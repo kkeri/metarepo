@@ -1,0 +1,177 @@
+import { ActionMap } from './action';
+import { PrettyFormatter } from './format';
+
+const idRegex = /^[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*$/
+
+export interface ModelPrinterArgs {
+  formatter: PrettyFormatter
+  actions: ActionMap,
+  styles?: { [index: string]: Function },
+  annotate?: boolean
+}
+
+
+// High level model formatter.
+// Its methods reflect typical syntax units.
+// Converts a program model to text with optional terminal colors.
+export class ModelPrinter {
+  fmt: PrettyFormatter
+  actions: ActionMap
+  styles: { [index: string]: Function }
+  annotate: boolean
+  busySet = new Set()
+
+  constructor (args: ModelPrinterArgs) {
+    this.fmt = args.formatter
+    this.actions = args.actions
+    this.styles = args.styles || {}
+    this.annotate = args.annotate || false
+  }
+
+  // Prints a value with respect to its type and class.
+  print (node: any, prec?: number) {
+    if (node === undefined) {
+      this.keyword('undefined')
+    } else if (node === null) {
+      this.keyword('null')
+    } else if (Array.isArray(node)) {
+      for (let i of node) this.print(i)
+    } else if (typeof node === 'object') {
+      if (typeof node.reflect === 'function') {
+        node = node.reflect()
+      }
+      if (this.busySet.has(node)) {
+        this.keyword('@circular')
+        return this
+      }
+      this.busySet.add(node)
+      let action = this.actions.get(node)
+      if (action) {
+        action.call(node, this, prec)
+      } else {
+        this.fmt.emit(String(node), this.styles.error)
+      }
+      this.busySet.delete(node)
+    } else if (typeof node === 'string') {
+      // todo: escape string
+      this.fmt.emit('\'' + node + '\'', this.styles.string)
+    } else if (typeof node === 'number') {
+      this.fmt.emit(node.toString(), this.styles.number)
+    } else if (typeof node === 'function') {
+      if (this.annotate) {
+        this.keyword('@function')
+        this.fmt.emit(' ')
+      }
+      this.id(node.name ? node.name : '<anonymous-function>')
+    } else {
+      // todo: add regexp
+      this.fmt.emit(node.toString())
+    }
+    return this
+  }
+
+  // Prints a parenthesized, comma separated list of models.
+  parenList (items: any[]) {
+    if (items.length === 0) {
+      this.delimiter('()')
+    } else {
+      this.fmt.block(items, (item) => this.print(item), {
+        open: '(',
+        close: ')',
+        separator: ','
+      })
+    }
+    return this
+  }
+
+  operation (op, prec, a, b) {
+    if (op.precedence < prec) this.delimiter('(')
+    switch (op.fixity) {
+      case 'in':
+        this.print(a, op.precedence).operator(op).print(b, op.precedence)
+        break
+      case 'pre':
+        this.operator(op).print(a, op.precedence)
+        break
+      case 'post':
+        this.print(a, op.precedence).operator(op)
+        break
+    }
+    if (op.precedence < prec) this.delimiter(')')
+  }
+
+  operator (op) {
+    if (op.fixity !== 'in' || op.noPadding) {
+      this.fmt.emit(op.symbol, this.styles.operator)
+    }
+    else {
+      this.ws().fmt.emit(op.symbol, this.styles.operator)
+      this.ws()
+    }
+    return this
+  }
+
+  // Prints a chunk of text with optional style.
+  text (text: string, style?: Function) {
+    this.fmt.emit(text, style)
+    return this
+  }
+
+  // Prints a freshly bound key with syntax highlight.
+  boundKey (key: string | number | symbol) {
+    if (typeof key === 'string' && idRegex.test(key)) {
+      this.id(key)
+    } else {
+      this.delimiter('[').print(key).delimiter(']')
+    }
+    return this
+  }
+
+  // Prints an identifier with syntax highlight.
+  id (key: string) {
+    this.fmt.emit(key.toString(), this.styles.name)
+    return this
+  }
+
+  // Prints a reserved word with syntax highlight.
+  keyword (word: string) {
+    this.fmt.emit(word, this.styles.keyword)
+    return this
+  }
+
+  // Prints a delimiter with syntax highlight.
+  delimiter (delimiter: string) {
+    this.fmt.emit(delimiter, this.styles.delimiter)
+    return this
+  }
+
+  // Starts a new empty line if the current line is not empty.
+  br () {
+    this.fmt.br()
+    return this
+  }
+
+  // Increments indentation level beginning with the next line.
+  indent () {
+    this.fmt.indent()
+    return this
+  }
+
+  // Decrements indentation level beginning with the next line.
+  unindent () {
+    this.fmt.unindent()
+    return this
+  }
+
+  // Prints non-breaking space.
+  ws () {
+    this.fmt.emit(' ')
+    return this
+  }
+
+  // Prints breaking space.
+  bs () {
+    this.fmt.emit({ value: ' ', breakValue: '' })
+    return this
+  }
+}

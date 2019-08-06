@@ -1,0 +1,33 @@
+.eq a, a
+
+.eq a\/false, a
+.eq a\/a, a
+.eq a\/true, true
+
+.eq a/\false, false
+.eq a/\a, a
+.eq a/\true, a
+
+.r
+a
+.eq a\/b, true
+
+.r
+b
+.eq a\/b, true
+
+.r
+a
+b
+.eq a/\b, true
+
+.r
+a/\b
+.eq a, true
+.eq b, true
+
+.r
+a\/b
+~a\/c
+~b\/c
+.eq c, true
