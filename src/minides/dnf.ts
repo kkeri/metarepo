@@ -1,4 +1,4 @@
-import { Model, Or, And, Not, True, False, Name } from './model';
+import { Model, Or, And, Not, True, False } from './model';
 import { equal } from './equal';
 
 let depth = 0
@@ -64,6 +64,10 @@ export function not (a: Model) {
   return new Not(a)
 }
 
-function isLiteral (a: Model) {
-  return a instanceof Name || a instanceof Not && a.a instanceof Name
+function isLiteral (a: Model): boolean {
+  return isAtom(a) || a instanceof Not && isAtom(a.a)
+}
+
+function isAtom (a: Model): boolean {
+  return !(a instanceof Or || a instanceof And || a instanceof Not)
 }
