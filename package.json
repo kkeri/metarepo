@@ -1,17 +1,7 @@
 {
   "name": "metarepo",
   "version": "0.0.1",
-  "description": "A language independent program model",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "tap -J -b test/*.js",
-    "build": "npm run tsc && npm run ohm",
-    "ohm": "node ohm/build",
-    "ohm-watch": "watch-run -i -p ohm/metahack.ohm node ohm/build",
-    "watch": "concurrently --names \"ohm,tsc\" -p \"[{name}]\" -c cyan,magenta \"npm run ohm-watch\" \"npm run tsc-watch\"",
-    "tsc": "tsc -p .",
-    "tsc-watch": "tsc -w -p ."
-  },
+  "description": "Metaprogramming experiments",
   "keywords": [
     "metaprogramming"
   ],
@@ -26,7 +16,7 @@
     "@types/node": "^11.11.3",
     "concurrently": "^3.5.0",
     "tap": "^14.4.2",
-    "typescript": "^3.3.3333",
+    "typescript": "^3.7.2",
     "watch-run": "^1.2.5"
   }
 }
