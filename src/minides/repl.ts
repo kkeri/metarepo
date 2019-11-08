@@ -2,12 +2,14 @@ import * as colors from 'colors';
 import * as readline from 'readline';
 import { Diagnostics } from '../util/diag';
 import { PrettyFormatter } from '../util/format';
-import { Model, True, And } from './model';
-import { deduce, and } from './interpreter';
-import { parser } from './parser';
-import { printActions } from './print';
+import { OhmParser } from '../util/parser';
 import { ModelPrinter } from '../util/printer';
 import { equal } from './equal';
+import { deduce } from './interpreter';
+import { And, Model, True } from './model';
+import { onf as nf } from './onf';
+import { createParser } from './parser';
+import { printActions } from './print';
 import stream = require('stream');
 
 export const styles = {
@@ -26,6 +28,7 @@ const formatOptions = {
 }
 
 interface ReplState {
+  parser: OhmParser
   formatter: PrettyFormatter
   // output: stream.Writable
   antecedent: Model
@@ -38,6 +41,7 @@ export function repl (
 ) {
   const rl = readline.createInterface({ input, output })
   const state: ReplState = {
+    parser: createParser(nf),
     formatter: new PrettyFormatter(output, 0, formatOptions),
     // output,
     antecedent: True,
@@ -136,7 +140,7 @@ function append (a: Model, state: ReplState) {
   try {
     const result = deduce(state.antecedent, a)
     printModel(result, state).br()
-    state.antecedent = and(state.antecedent, result)
+    state.antecedent = nf.and(state.antecedent, result)
   }
   catch (e) {
     state.formatter.emit(e.toString()).br()
@@ -182,7 +186,7 @@ function assertEquality (a: Model, b: Model, state: ReplState) {
 
 function parseStatement (str: string, state: ReplState) {
   const diag = new Diagnostics()
-  const stmt = parser.parse(str, { diag, rule: 'Statement' })
+  const stmt = state.parser.parse(str, { diag, rule: 'Statement' })
   if (!stmt) {
     for (const msg of diag.messages) {
       state.formatter.emit(msg.message).br()

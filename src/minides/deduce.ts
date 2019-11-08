@@ -1,8 +1,8 @@
-import { UnaryOp, BinaryOp } from './types';
 import { Model, Or, And, True, False } from './model';
 import { equal } from './equal';
+import { LogicalNormalForm, BinaryOp } from './types';
 
-export function makeDeduce (or: BinaryOp, and: BinaryOp, not: UnaryOp): BinaryOp {
+export function makeDeduce ({ or, and, not }: LogicalNormalForm): BinaryOp {
 
   function deduce (a: Model, b: Model): Model {
     if (equal(not(a), b)) return False

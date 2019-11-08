@@ -1,5 +1,8 @@
 import { Model, Or, And, Not, True, False } from './model';
 import { equal } from './equal';
+import { LogicalNormalForm } from './types';
+
+export const dnf: LogicalNormalForm = { or, and, not }
 
 let depth = 0
 
@@ -9,7 +12,7 @@ function checkDepth () {
   }
 }
 
-export function or (a: Model, b: Model) {
+function or (a: Model, b: Model) {
   checkDepth()
   depth++
   try {
@@ -29,7 +32,7 @@ export function or (a: Model, b: Model) {
   return new Or(a, b)
 }
 
-export function and (a: Model, b: Model) {
+function and (a: Model, b: Model) {
   checkDepth()
   depth++
   try {
@@ -49,7 +52,7 @@ export function and (a: Model, b: Model) {
   return new And(a, b)
 }
 
-export function not (a: Model) {
+function not (a: Model) {
   checkDepth()
   depth++
   try {

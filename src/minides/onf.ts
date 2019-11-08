@@ -1,69 +1,72 @@
 import { Model, Or, And, Not, True, False } from './model';
 import { equal } from './equal';
+import { compare } from './compare';
+import { LogicalNormalForm } from './types';
 
-let depth = 0
+export const onf: LogicalNormalForm = { or, and, not }
 
-function checkDepth () {
-  if (depth > 10) {
-    // console.log('depth:', depth)
+function or (a: Model, b: Model) {
+  if (a === False) return b
+  if (b === False) return a
+  if (a === True) return True
+  if (b === True) return True
+  if (b instanceof Or) return or(or(a, b.a), b.b)
+  if (a instanceof Or) {
+    const c = or(a.b, b)
+    if (c instanceof Or) {
+      return new Or(or(a.a, c.a), c.b)
+    }
+    else {
+      return or(a.a, c)
+    }
   }
-}
-
-export function or (a: Model, b: Model) {
-  checkDepth()
-  depth++
-  try {
-    if (a === False) return b
-    if (b === False) return a
-    if (a === True) return True
-    if (b === True) return True
-    if (isLiteral(a) && isLiteral(b)) {
-      if (equal(a, b)) return a
-      if (equal(not(a), b)) return True
+  if (isLiteral(a) && isLiteral(b)) {
+    const atomA = isAtom(a) ? a : (<Not>a).a
+    const atomB = isAtom(b) ? b : (<Not>b).a
+    switch (compare(atomA, atomB)) {
+      case -1: return new Or(a, b)
+      case +1: return new Or(b, a)
+      case 0:
+        if ((a instanceof Not) === (b instanceof Not)) return a; else return True
     }
-    if (b instanceof Or) return or(or(a, b.a), b.b)
-    if (a instanceof Or) {
-
-    }
-    // both operands are con-terms
-  } finally {
-    depth--
   }
   return new Or(a, b)
 }
 
-export function and (a: Model, b: Model) {
-  checkDepth()
-  depth++
-  try {
-    if (a === True) return b
-    if (b === True) return a
-    if (a === False) return False
-    if (b === False) return False
-    if (isLiteral(a) && isLiteral(b)) {
-      if (equal(a, b)) return a
-      if (equal(not(a), b)) return False
+function and (a: Model, b: Model) {
+  if (a === True) return b
+  if (b === True) return a
+  if (a === False) return False
+  if (b === False) return False
+  if (b instanceof And) return and(and(a, b.a), b.b)
+  if (a instanceof And) {
+    const c = and(a.b, b)
+    if (c instanceof And) {
+      return new And(and(a.a, c.a), c.b)
     }
-    if (a instanceof Or) return or(and(a.a, b), and(a.b, b))
-    if (b instanceof Or) return or(and(a, b.a), and(a, b.b))
-  } finally {
-    depth--
+    else {
+      return and(a.a, c)
+    }
+  }
+  if (isLiteral(a) && isLiteral(b)) {
+    const atomA = isAtom(a) ? a : (<Not>a).a
+    const atomB = isAtom(b) ? b : (<Not>b).a
+    switch (compare(atomA, atomB)) {
+      case -1: return new And(a, b)
+      case +1: return new And(b, a)
+      case 0:
+        if ((a instanceof Not) === (b instanceof Not)) return a; else return False
+    }
   }
   return new And(a, b)
 }
 
-export function not (a: Model) {
-  checkDepth()
-  depth++
-  try {
-    if (a === True) return False
-    if (a === False) return True
-    if (a instanceof Or) return and(not(a.a), not(a.b))
-    if (a instanceof And) return or(not(a.a), not(a.b))
-    if (a instanceof Not) return a.a
-  } finally {
-    depth--
-  }
+function not (a: Model) {
+  if (a === True) return False
+  if (a === False) return True
+  if (a instanceof Or) return and(not(a.a), not(a.b))
+  if (a instanceof And) return or(not(a.a), not(a.b))
+  if (a instanceof Not) return a.a
   return new Not(a)
 }
 
