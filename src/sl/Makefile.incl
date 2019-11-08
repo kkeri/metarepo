@@ -1,0 +1,5 @@
+
+sl sl-all: ts lib/sl/sl-recipe.js
+
+lib/sl/sl-recipe.js: src/sl/sl.ohm
+	script/build-ohm.js $< $@

@@ -1,0 +1,112 @@
+SL {
+
+	Module = SemicolonList #semicolon?
+	
+	SemicolonList =
+		| SemicolonList #semicolon Expression -- default
+		| Expression
+	
+	CommaList =
+		| CommaList #comma Expression -- default
+		| Expression
+
+	Expression = Join
+	
+	Join =
+		| Join "\\/" Meet -- default
+		| Meet
+
+	Meet =
+		| Meet "/\\" Choice -- default
+		| Choice
+
+	Choice =
+		| Choice "\\\\" Application -- default
+		| Application
+
+	Application =
+		| Application #spaceInline Primary -- default
+		| Primary
+
+	Primary = 
+		| BraceBlock
+		| BracketBlock
+		| ParenBlock
+		| Literal
+		| MemberRef
+		| Name
+
+	Literal =
+		| number
+		| string
+		| regexp
+		| true
+		| false
+
+	BracketBlock = "[" CommaList #comma? "]"
+
+	BraceBlock = "{" SemicolonList #semicolon? "}"
+
+	ParenBlock = "(" CommaList #comma? ")"
+
+	MemberRef = Primary "." Name
+
+	Name = identifier
+
+	// lexer
+
+	space := "\t" | " " | "\n" | "\r" | comment
+	spaceInline = "\t" | " " | commentInline
+	comment = blockComment | lineEndComment
+	commentInline = blockCommentInline | lineEndComment
+	blockComment = "/*" (~"*/" any)* "*/"
+	blockCommentInline = "/*" (~("*/" | "\n" | "\r") any)* "*/"
+	lineEndComment = "//" (~("\n" | "\r") any)*
+
+	semicolon =
+		| space* (";" | end)
+		| spaceInline* ("\r" | "\n" | end)
+
+	comma =
+		| space* ("," | end)
+		| spaceInline* ("\r" | "\n" | end)
+
+	identifier (an indentifier) = identifierStart identifierPart*
+	identifierStart = "A".."Z" | "a".."z" | "_" | "$"
+	identifierPart = identifierStart | digit
+
+	number (a number) = "-"? natural ("." fractionalPart)? exponentPart?
+	natural = positiveInteger | "0"
+	positiveInteger = nonZeroDigit digit*
+	fractionalPart = digit+
+	exponentPart = ("e" | "E") ("+" | "-")? digit+
+	nonZeroDigit = "1".."9"
+
+	string (a string) = singleQuotedString | doubleQuotedString
+	singleQuotedString = "\'" sqStringCharacter* "\'"
+	sqStringCharacter = sqNormalChar | escapeSequence
+	sqNormalChar = ~("\'" | "\\" | "\u0000".."\u001f") any
+	doubleQuotedString = "\"" dqStringCharacter* "\""
+	dqStringCharacter = dqNormalChar | escapeSequence
+	dqNormalChar = ~("\"" | "\\" | "\u0000".."\u001f") any
+	escapeSequence = "\\" escapeSpec
+	escapeSpec =
+		| "\""
+		| "'"
+		| "\\"
+		| "\\/"
+		| "b"
+		| "f"
+		| "n"
+		| "r"
+		| "t"
+		| unicodeEscapeSpec
+	unicodeEscapeSpec = "u" hexDigit hexDigit hexDigit hexDigit
+
+	regexp (a regular expression) = "/" regexpBody "/" regexpFlags
+	regexpBody = ("\\/" | ~"/" any)+
+	regexpFlags = ("A".."Z" | "a".."z")*
+
+	true = "true" ~ identifierPart
+	false = "false" ~ identifierPart
+}
