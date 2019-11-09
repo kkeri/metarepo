@@ -1,7 +1,0 @@
-
-minides: ts minides-parser
-
-minides-parser: lib/minides/minides-recipe.js
-
-lib/minides/minides-recipe.js: src/minides/minides.ohm
-	script/build-ohm.js $< $@

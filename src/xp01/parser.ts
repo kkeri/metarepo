@@ -4,7 +4,7 @@ import { OhmParser } from '../util/parser';
 import { LogicalNormalForm } from './types';
 
 export function createParser ({ or, and, not }: LogicalNormalForm): OhmParser {
-  return new OhmParser(join(__dirname, './minides-recipe.js'), {
+  return new OhmParser(join(__dirname, './xp01-recipe.js'), {
 
     Module (body, _sc_) {
       return body.model()

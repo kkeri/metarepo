@@ -1,0 +1,7 @@
+
+xp01: ts xp01-parser
+
+xp01-parser: lib/xp01/xp01-recipe.js
+
+lib/xp01/xp01-recipe.js: src/xp01/xp01.ohm
+	script/build-ohm.js $< $@

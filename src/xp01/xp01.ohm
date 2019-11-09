@@ -1,4 +1,4 @@
-Minides {
+XP01 {
 
 	Module = StatementList #separator?
 
