@@ -42,14 +42,19 @@ export interface ParseContext {
   source: string
   // The current parsing position.
   pos: number
-  // All parser rules by name.
-  rules: ParserRules
-  // Returns the cache for a specific parser expression.
+  // Returns the cache for a specific model.
   useCache (node: Model): Map<number, any>
   // Saves the current state of the context.
   save (): RestorePoint
   // Restores a previous state of the context.
   restore (point: RestorePoint)
+  // Parses a string. Returns a failure object on failure.
+  matchString (str: string): boolean
+  // Parses a sticky regular expression. 'regexp' must have the sticky flag set. 
+  // On success returns the matching string.
+  matchRegexp (regexp: RegExp): string | null
+  // Skips white space.
+  skipSpace (): void
 }
 
 export type ParserRules = { [index: string]: Model }
@@ -72,4 +77,3 @@ export interface Monoid {
   // Increments version of the monoid.
   updateRight (value: Model, ctx: ReduceContext): Model
 }
-

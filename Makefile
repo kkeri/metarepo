@@ -1,6 +1,6 @@
 
 project_paths += src/minides
-project_paths += src/x01
+project_paths += src/xp02
 
 #=============================================================================
 

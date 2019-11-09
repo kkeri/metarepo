@@ -2,7 +2,7 @@ import { join } from 'path'
 import * as model from './model'
 import { OhmParser } from '../util/parser';
 
-export const ohmParser = new OhmParser(join(__dirname, './x01-recipe.js'), {
+export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
 
   Module (list, _sc_) {
     return list.model()

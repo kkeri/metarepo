@@ -1,6 +1,5 @@
-import { Model, ReduceContext, Rank, ParseContext, Monoid, NormalModel } from './types'
+import { Model, ReduceContext, Rank, ParseContext, Monoid, NormalModel } from './types.d'
 import { apply, choose, equal, reduce, reflect, join, meet, thunk, createContext, isRedex, isNormalForm, isApplicable } from './interpreter';
-import { assert } from 'console';
 
 
 // Obsoleted, use only as a reminder
@@ -9,7 +8,7 @@ export class ModelClass implements Model {
   rank?: Rank
 
   parse (pc: ParseContext): Model {
-    return this
+    return new BottomClass()
   }
 
   reduce (env: Model, ctx: ReduceContext): Model {
@@ -48,7 +47,7 @@ export class ModelClass implements Model {
     // this is for the type system
     if (!isNormalForm(this)) throw new Error('model must be in normal form')
     return this
-  } S
+  }
 
   shallowCopy () {
     return Object.assign(Object.create(Object.getPrototypeOf(this)), this)
@@ -71,6 +70,15 @@ export class BracketBlock extends ModelClass {
   equal (other) {
     return equal(this.contents, other.contents)
   }
+
+  parse (pc: ParseContext) {
+    pc.skipSpace()
+    if (!pc.matchString('[')) return new BottomClass()
+    const contents = this.contents.parse(pc)
+    if (contents.rank === Rank.Failure) return contents
+    if (!pc.matchString(']')) return new BottomClass()
+    return new BracketBlock(contents)
+  }
 }
 
 export class BraceBlock extends ModelClass {
@@ -88,6 +96,15 @@ export class BraceBlock extends ModelClass {
 
   equal (other) {
     return equal(this.contents, other.contents)
+  }
+
+  parse (pc: ParseContext) {
+    pc.skipSpace()
+    if (!pc.matchString('{')) return new BottomClass()
+    const contents = this.contents.parse(pc)
+    if (contents.rank === Rank.Failure) return contents
+    if (!pc.matchString('}')) return new BottomClass()
+    return new BraceBlock(contents)
   }
 }
 
@@ -288,6 +305,18 @@ export class TopClass extends ModelClass {
 
   reflect () {
     return new Name('Top')
+  }
+}
+
+export class BottomClass extends ModelClass {
+  rank = Rank.Failure
+
+  constructor () {
+    super()
+  }
+
+  reflect () {
+    return new Name('Bottom')
   }
 }
 
