@@ -68,3 +68,7 @@ notes
 
 # object files
 lib
+
+# tap coverage reports
+
+-cov
