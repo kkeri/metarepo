@@ -1,6 +1,6 @@
 import { join } from 'path'
 import * as model from './model'
-import { OhmParser } from '../util/parser';
+import { OhmParser } from '../util/ohmParser'
 
 export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
 
@@ -11,22 +11,16 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
   // expression
 
   SemicolonList_default (left, op, right) {
-    return new model.Meet(left.model(), right.model())
+    return new model.And(left.model(), right.model())
   },
   CommaList_default (left, op, right) {
-    return new model.Join(left.model(), right.model())
+    return new model.Or(left.model(), right.model())
   },
   Join_default (left, op, right) {
-    return new model.Join(left.model(), right.model())
+    return new model.Or(left.model(), right.model())
   },
   Meet_default (left, op, right) {
-    return new model.Meet(left.model(), right.model())
-  },
-  Choice_default (left, op, right) {
-    return new model.Choice(left.model(), right.model())
-  },
-  Application_default (left, op, right) {
-    return new model.Application(left.model(), right.model())
+    return new model.And(left.model(), right.model())
   },
   BracketBlock (_lb_, body, _comma_, _rb_) {
     return new model.BracketBlock(body.model())
@@ -50,20 +44,19 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
     return this.source.contents
   },
   number (sign, int, _point_, frac, exp) {
-    return new model.Literal(parseFloat(this.source.contents))
+    return new model.NumberConstant(parseFloat(this.source.contents))
   },
   natural (chars) {
     return parseInt(this.source.contents)
   },
   singleQuotedString (quote1, chars, quote2) {
-    return new model.Literal(chars.source.contents)
+    return new model.StringConstant(chars.source.contents)
   },
   doubleQuotedString (quote1, chars, quote2) {
-    return new model.Literal(chars.source.contents)
+    return new model.StringConstant(chars.source.contents)
   },
   regexp (slash1, body, slash2, flags) {
-    return new model.Failure(new model.Literal(this.source.contents),
-      'NOT_IMPLEMENTED', 'regular expression is not implemented')
+    return new model.RegExpConstant(this.source.contents)
   },
   regexpFlags (chars) {
     return this.source.contents

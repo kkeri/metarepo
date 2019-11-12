@@ -2,7 +2,7 @@ import * as colors from 'colors';
 import * as readline from 'readline';
 import { Diagnostics } from '../util/diag';
 import { PrettyFormatter } from '../util/format';
-import { OhmParser } from '../util/parser';
+import { OhmParser } from '../util/ohmParser';
 import { ModelPrinter } from '../util/printer';
 import { equal } from './equal';
 import { deduce } from './interpreter';

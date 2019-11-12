@@ -19,8 +19,7 @@
 			"request": "launch",
 			"name": "Launch Program",
 			"smartStep": true,
-			"program": "${workspaceFolder}\\lib\\index.js",
-			"preLaunchTask": "tsc: build - tsconfig.json",
+			"program": "${file}",
 			"outFiles": [
 				"${workspaceFolder}/lib/**/*.js"
 			]

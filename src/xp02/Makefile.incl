@@ -1,5 +1,10 @@
 
-xp02 xp02-all: ts lib/xp02/xp02-recipe.js
+xp02 xp02-all: ts xp02-parser
+
+xp02-parser: lib/xp02/xp02-recipe.js
 
 lib/xp02/xp02-recipe.js: src/xp02/xp02.ohm
 	script/build-ohm.js $< $@
+
+xp02-test:
+	$(TAP) lib/xp02/test/*.js

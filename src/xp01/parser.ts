@@ -1,6 +1,6 @@
 import { join } from 'path'
 import * as model from './model'
-import { OhmParser } from '../util/parser';
+import { OhmParser } from '../util/ohmParser';
 import { LogicalNormalForm } from './types';
 
 export function createParser ({ or, and, not }: LogicalNormalForm): OhmParser {

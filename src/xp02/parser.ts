@@ -1,53 +1,63 @@
-import { ParserRules, ParseContext, Model } from './types'
+import { Model, Rank, Context } from './types'
+import { UnaryDispatcher } from './dispatcher'
 
-export class ParseContextClass implements ParseContext {
-  caches = new Map<Model, Map<number, any>>()
-  pos = 0
-  space = /[ \t\r\n]*/y
+export type ParserRule = (ctx: ParseContext, syntax: Model) => Model
+
+export type RestorePoint = number
+
+export interface ParseContext extends Context {
+  // The source text.
+  source: string
+  // Name of source for diagnostics.
+  sourceName: string
+  // The current parsing position.
+  pos: number
+  // A parser function for all model types.
+  rules: UnaryDispatcher<ParserRule>
+}
+
+// parses a syntax model at the current position.
+export function parse (ctx: ParseContext, syntax: Model): Model {
+  return ctx.rules.get(syntax)(ctx, syntax)
+}
+
+
+export function matchString (ctx: ParseContext, value: string) {
+  if (ctx.source.substr(ctx.pos, value.length) === value) {
+    ctx.pos += value.length
+    return true
+  }
+  return false
+}
+
+export function matchRegexp (ctx: ParseContext, regexp: RegExp) {
+  regexp.lastIndex = ctx.pos
+  const matches = regexp.exec(ctx.source)
+  if (matches) {
+    ctx.pos = regexp.lastIndex
+    return matches[0]
+  }
+  return null
+}
+
+const space = /[ \t\r\n]*/y
+
+export function skipSpace (ctx: ParseContext, ) {
+  space.lastIndex = ctx.pos
+  space.test(ctx.source)
+  ctx.pos = space.lastIndex
+}
+
+export class SyntaxExpectation {
+  rank = Rank.Failure
+  sourceName: string
+  pos: number
 
   constructor (
-    public source: string,
-    public rules: ParserRules,
-  ) { }
-
-  useCache (node: Model): Map<number, any> {
-    let cache = this.caches.get(node)
-    if (!cache) {
-      cache = new Map<number, any>()
-      this.caches.set(node, cache)
-    }
-    return cache
-  }
-
-  save () {
-    return this.pos
-  }
-
-  restore (point) {
-    this.pos = point
-  }
-
-  matchString (value: string) {
-    if (this.source.substr(this.pos, value.length) === value) {
-      this.pos += value.length
-      return true
-    }
-    return false
-  }
-
-  matchRegexp (regexp: RegExp) {
-    regexp.lastIndex = this.pos
-    const matches = regexp.test(this.source)
-    if (matches) {
-      this.pos = regexp.lastIndex
-      return matches[0]
-    }
-    return null
-  }
-
-  skipSpace () {
-    this.space.lastIndex = this.pos
-    this.space.test(this.source)
-    this.pos = this.space.lastIndex
+    ctx: ParseContext,
+    public model: Model,
+  ) {
+    this.sourceName = ctx.sourceName
+    this.pos = ctx.pos
   }
 }
