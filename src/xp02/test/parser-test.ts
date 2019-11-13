@@ -53,6 +53,16 @@ test('Number', t => {
   t.end()
 })
 
+test('Name', t => {
+  t.same(xpParse(new model.NameType(), ''), new model.Missing(new model.NameType()))
+  t.same(xpParse(new model.NameType(), '.'), new model.Missing(new model.NameType()))
+  t.same(xpParse(new model.NameType(), '3'), new model.Missing(new model.NameType()))
+  t.same(xpParse(new model.NameType(), 'a'), new model.NameConstant('a'))
+  t.same(xpParse(new model.NameType(), 'abc123'), new model.NameConstant('abc123'))
+  t.same(xpParse(new model.NameType(), '_'), new model.NameConstant('_'))
+  t.end()
+})
+
 test('Or', t => {
   const s1 = new model.Or(new model.NumberType(), new model.BooleanType())
   t.same(xpParse(s1, ''),

@@ -116,9 +116,14 @@ export class Binding {
   ) { }
 }
 
-export class Name {
+export class NameType {
+  rank = 0
+}
+
+export class NameConstant {
   constructor (
     public name: string,
+    public rank: Rank | null = null
   ) { }
 }
 
