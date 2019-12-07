@@ -16,4 +16,7 @@ ts:
 ts-watch:
 	tsc -w -p .
 
+libdir:
+	mkdir lib
+
 include $(project_paths:%=%/Makefile.incl)
