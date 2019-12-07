@@ -1,7 +1,14 @@
+xp01 xp01-all: xp01-parser
+	tsc -p src/xp01
 
-xp01: ts xp01-parser
+xp01-watch:
+	tsc -w -p src/xp01
 
 xp01-parser: lib/xp01/xp01-recipe.js
 
 lib/xp01/xp01-recipe.js: src/xp01/xp01.ohm
+	mkdir -p lib/xp01
 	script/build-ohm.js $< $@
+
+xp01-test:
+	$(TAP) lib/xp01/test/*.js
