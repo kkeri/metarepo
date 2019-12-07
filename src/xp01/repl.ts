@@ -5,9 +5,8 @@ import { PrettyFormatter } from '../util/format';
 import { OhmParser } from '../util/ohmParser';
 import { ModelPrinter } from '../util/printer';
 import { equal } from './equal';
-import { deduce } from './interpreter';
+import { deduce, nf } from './interpreter';
 import { And, Model, True } from './model';
-import { onf as nf } from './onf';
 import { createParser } from './parser';
 import { printActions } from './print';
 import stream = require('stream');
@@ -65,6 +64,8 @@ function evalLine (line, state: ReplState) {
   line = line.trim()
   if (line.length === 0) {
     // do nothing with an empty line
+  } else if (/^.*\/\//.test(line)) {
+    // skip comments starting with #
   } else if (/^\.[a-zA-Z]/.test(line)) {
     // commands start with .
     evalCommand(line, state)
