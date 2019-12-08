@@ -1,33 +1,104 @@
+// equality
+
 .eq a, a
+
+// laws of disjunction
 
 .eq a\/false, a
 .eq a\/a, a
 .eq a\/true, true
 
+// laws of conjunction
+
 .eq a/\false, false
 .eq a/\a, a
 .eq a/\true, a
-
 .r
+
+// success
+
 a
-.eq a\/b, true
-
+.eq a, true
 .r
-b
-.eq a\/b, true
 
+// negation 1
+
+a
+.eq ~a, false
 .r
+
+// negation 2
+
+~a
+.eq a, false
+.r
+
+// conjunction introduction
+
 a
 b
 .eq a/\b, true
-
 .r
+
+// conjunction elimination
+
 a/\b
 .eq a, true
 .eq b, true
-
 .r
+
+// disjunction introduction 1
+
+a
+.eq a\/b, true
+.r
+
+// disjunction introduction 2
+
+b
+.eq a\/b, true
+.r
+
+// disjunction elimination 1
+
 a\/b
 ~a\/c
 ~b\/c
 .eq c, true
+.r
+
+// disjunction elimination 2
+
+~a\/c
+~b\/c
+a\/b
+.eq c, true
+.r
+
+// modus ponens 1
+
+a
+~a\/c
+.eq c, true
+.r
+
+// modus ponens 2
+
+~a\/c
+a
+.eq c, true
+.r
+
+// modus tollens 1
+
+~c
+~a\/c
+.eq ~a, true
+.r
+
+// modus tollens 2
+
+~a\/c
+~c
+.eq ~a, true
+.r
