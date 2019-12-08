@@ -4,7 +4,7 @@ import { LogicalNormalForm, BinaryOp } from './types';
 
 export function makeDeduce ({ or, and, not }: LogicalNormalForm): BinaryOp {
 
-  function deduce (a: Model, b: Model): Model {
+  return function deduce (a: Model, b: Model): Model {
     // conjunction introduction
     if (b instanceof And) return and(deduce(a, b.a), deduce(a, b.b))
 
@@ -26,6 +26,4 @@ export function makeDeduce ({ or, and, not }: LogicalNormalForm): BinaryOp {
     // none of the rules can be applied
     return b
   }
-
-  return deduce
 }
