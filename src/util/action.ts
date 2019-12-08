@@ -1,11 +1,13 @@
 import * as assert from 'assert'
 
+// An extendable action map.
 export class ActionMap {
   map = new Map()
 
   constructor () {
   }
 
+  // Adds new action assignments.
   add (actions) {
     if (Array.isArray(actions)) {
       for (let item of actions) this.map.set(item[0], item[1])
@@ -19,6 +21,7 @@ export class ActionMap {
     return this
   }
 
+  // Associates classes with actions.
   addClasses (ctors, actions) {
     for (let name in actions) {
       let ctor = ctors[name]
@@ -28,6 +31,7 @@ export class ActionMap {
     return this
   }
 
+  // Retrieves the action for the specified object, if it is registered.
   get (key) {
     if (typeof key === 'object') {
       return this.map.get(Object.getPrototypeOf(key))

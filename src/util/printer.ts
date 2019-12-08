@@ -10,10 +10,9 @@ export interface ModelPrinterArgs {
   annotate?: boolean
 }
 
-
-// High level model formatter.
+// High level code formatter.
 // Its methods reflect typical syntax units.
-// Converts a program model to text with optional terminal colors.
+// Converts a program model to text with optional syntax highlight.
 export class ModelPrinter {
   fmt: PrettyFormatter
   actions: ActionMap
@@ -29,7 +28,7 @@ export class ModelPrinter {
   }
 
   // Prints a value with respect to its type and class.
-  print (node: any, prec?: number) {
+  print (node: any, prec?: number): this {
     if (node === undefined) {
       this.keyword('undefined')
     } else if (node === null) {
@@ -71,7 +70,7 @@ export class ModelPrinter {
   }
 
   // Prints a parenthesized, comma separated list of models.
-  parenList (items: any[]) {
+  parenList (items: any[]): this {
     if (items.length === 0) {
       this.delimiter('()')
     } else {
@@ -84,7 +83,7 @@ export class ModelPrinter {
     return this
   }
 
-  operation (op, prec, a, b) {
+  operation (op, prec, a, b): this {
     if (op.precedence < prec) this.delimiter('(')
     switch (op.fixity) {
       case 'in':
@@ -98,9 +97,10 @@ export class ModelPrinter {
         break
     }
     if (op.precedence < prec) this.delimiter(')')
+    return this
   }
 
-  operator (op) {
+  operator (op): this {
     if (op.fixity !== 'in' || op.noPadding) {
       this.fmt.emit(op.symbol, this.styles.operator)
     }
@@ -112,13 +112,13 @@ export class ModelPrinter {
   }
 
   // Prints a chunk of text with optional style.
-  text (text: string, style?: Function) {
+  text (text: string, style?: Function): this {
     this.fmt.emit(text, style)
     return this
   }
 
   // Prints a freshly bound key with syntax highlight.
-  boundKey (key: string | number | symbol) {
+  boundKey (key: string | number | symbol): this {
     if (typeof key === 'string' && idRegex.test(key)) {
       this.id(key)
     } else {
@@ -128,49 +128,49 @@ export class ModelPrinter {
   }
 
   // Prints an identifier with syntax highlight.
-  id (key: string) {
+  id (key: string): this {
     this.fmt.emit(key.toString(), this.styles.name)
     return this
   }
 
   // Prints a reserved word with syntax highlight.
-  keyword (word: string) {
+  keyword (word: string): this {
     this.fmt.emit(word, this.styles.keyword)
     return this
   }
 
   // Prints a delimiter with syntax highlight.
-  delimiter (delimiter: string) {
+  delimiter (delimiter: string): this {
     this.fmt.emit(delimiter, this.styles.delimiter)
     return this
   }
 
   // Starts a new empty line if the current line is not empty.
-  br () {
+  br (): this {
     this.fmt.br()
     return this
   }
 
   // Increments indentation level beginning with the next line.
-  indent () {
+  indent (): this {
     this.fmt.indent()
     return this
   }
 
   // Decrements indentation level beginning with the next line.
-  unindent () {
+  unindent (): this {
     this.fmt.unindent()
     return this
   }
 
   // Prints non-breaking space.
-  ws () {
+  ws (): this {
     this.fmt.emit(' ')
     return this
   }
 
   // Prints breaking space.
-  bs () {
+  bs (): this {
     this.fmt.emit({ value: ' ', breakValue: '' })
     return this
   }

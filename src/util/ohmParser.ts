@@ -2,6 +2,8 @@ import { readFileSync } from 'fs'
 import { makeRecipe } from 'ohm-js/src/main.js'
 import { Diagnostics } from '../util/diag'
 
+// Wrapper for Ohm grammars.
+// To use this class, build a recipe first using `script/build-ohm.js`.
 export class OhmParser {
   ohmParser
   semantics
@@ -19,6 +21,9 @@ export class OhmParser {
     this.semantics.addOperation('model', actions)
   }
 
+  // Parses a string and calls the operation provided by the user.
+  // On success, returns the resulting model.
+  // On failure returns null and signals the parse error via `options.diag`.
   parse (str: string, opts: {
     diag: Diagnostics,
     rule?: string,

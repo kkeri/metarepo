@@ -3,7 +3,9 @@ import { EventEmitter } from 'events'
 import stream = require('stream')
 
 interface Repl extends EventEmitter {
+  // Emitted when the user enters a new line.
   emit (event: 'line', line: string): boolean
+  // Emitted when the REPL is closed.
   emit (event: 'close'): boolean
 
   on (event: 'line', listener: (line: string) => void): this
@@ -13,6 +15,7 @@ interface Repl extends EventEmitter {
   once (event: 'close', listener: () => void): this
 }
 
+// Generic read-eval-print loop.
 export class ReplClass extends EventEmitter implements Repl {
   rl: readline.Interface
 
@@ -23,16 +26,18 @@ export class ReplClass extends EventEmitter implements Repl {
     super()
     this.rl = readline.createInterface({ input, output })
     this.rl.prompt(true)
-    this.rl.on('line', (line) => {
-      this.emit('line', line)
-      this.rl.prompt(true)
-    }).on('close', () => {
-      this.emit('close')
-    })
+    this.rl
+      .on('line', (line) => {
+        this.emit('line', line)
+        this.rl.prompt(true)
+      })
+      .on('close', () => {
+        this.emit('close')
+      })
   }
 
   setPrompt (prompt: string): void {
-
+    // todo
   }
 
   write (str: string): void {

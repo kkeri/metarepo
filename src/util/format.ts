@@ -6,6 +6,7 @@ export interface PrettyFormatterOptions {
   breakLimit?: number
 }
 
+// Low level output formatter.
 export class PrettyFormatter {
   options: PrettyFormatterOptions
   lineLength = 0
@@ -25,7 +26,7 @@ export class PrettyFormatter {
    * Starts a new empty line if the current line is not empty.
    * @returns the formatter.
    */
-  br () {
+  br (): this {
     this.needBreak = false
     if (this.lineLength) {
       this.output.write(this.options.lineBreak)
@@ -38,7 +39,7 @@ export class PrettyFormatter {
    * Increments indentation level beginning with the next line.
    * @returns the formatter.
    */
-  indent () {
+  indent (): this {
     this.depth++
     return this.emit('')
   }
@@ -47,7 +48,7 @@ export class PrettyFormatter {
    * Decrements indentation level beginning with the next line.
    * @returns the formatter.
    */
-  unindent () {
+  unindent (): this {
     this.depth--
     return this.emit('')
   }
@@ -65,7 +66,7 @@ export class PrettyFormatter {
    * @param {string} format.separator - A token that is written between each item
    * @returns the formatter.
    */
-  block (items, itemCb, format) {
+  block (items, itemCb, format): this {
     let hasItems
     if (format.open) this.emit(format.open)
     for (var item of items) {
@@ -102,7 +103,7 @@ export class PrettyFormatter {
    * @param {(string|Object)} token - A string or a token object.
    * @returns the formatter.
    */
-  emit (token, style?: Function) {
+  emit (token, style?: Function): this {
     if (this.needBreak) {
       this.br()
     }
