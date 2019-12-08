@@ -31,6 +31,8 @@ interface ReplState {
   formatter: PrettyFormatter
   // output: stream.Writable
   antecedent: Model
+  assertions: number
+  failures: number
   exit: (() => void)
 }
 
@@ -44,6 +46,8 @@ export function repl (
     formatter: new PrettyFormatter(output, 0, formatOptions),
     // output,
     antecedent: True,
+    assertions: 0,
+    failures: 0,
     exit: () => rl.close()
   }
   rl.prompt(true)
@@ -121,6 +125,12 @@ function evalCommand (line, state: ReplState) {
 
     // other
 
+    case 'summary':
+      if (state.failures) {
+        state.formatter.emit(`${state.failures} of ${state.assertions} assertions have failed`).br()
+      }
+      break
+
     case 'x':
     case 'exit':
       state.exit()
@@ -149,17 +159,18 @@ function append (a: Model, state: ReplState) {
 }
 
 function assert (a: Model, state: ReplState) {
+  state.assertions++
   try {
     const result = deduce(state.antecedent, a)
     if (equal(result, True)) {
       return
     }
     else {
+      state.failures++
       state.formatter.emit(`assertion failed: `)
       printModel(a, state).br()
       state.formatter.emit(`result: `)
       printModel(result, state).br()
-      state.exit()
     }
   }
   catch (e) {
@@ -168,16 +179,17 @@ function assert (a: Model, state: ReplState) {
 }
 
 function assertEquality (a: Model, b: Model, state: ReplState) {
+  state.assertions++
   try {
     if (equal(a, b)) {
       return
     }
     else {
+      state.failures++
       state.formatter.emit(`assertion failed: `)
       printModel(a, state)
       state.formatter.emit(' != ')
       printModel(b, state).br()
-      state.exit()
     }
   }
   catch (e) {
