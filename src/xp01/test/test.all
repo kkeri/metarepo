@@ -2,17 +2,19 @@
 
 .eq a, a
 
-// laws of disjunction
+// laws of disjunction up to syntactic equality
 
 .eq a\/false, a
 .eq a\/a, a
 .eq a\/true, true
+.eq a\/~a, true
 
-// laws of conjunction
+// laws of conjunction up to syntactic equality
 
 .eq a/\false, false
 .eq a/\a, a
 .eq a/\true, a
+.eq a/\~a, false
 .r
 
 // success
@@ -86,6 +88,18 @@ a
 
 ~a\/c
 a
+.eq c, true
+.r
+
+// modus ponens-like 1
+
+a /\ (~a\/c)
+.eq c, true
+.r
+
+// modus ponens-like 2
+
+(~a\/c) /\ a
 .eq c, true
 .r
 
