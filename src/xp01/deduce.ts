@@ -17,11 +17,14 @@ export function makeDeduce ({ or, and, not }: LogicalNormalForm): BinaryOp {
     // disjunction elimination
     if (a instanceof Or) return and(deduce(a.a, b), deduce(a.b, b))
 
-    // identity
+    // success
     if (equal(a, b)) return True
 
-    // law of non-contradiction
+    // failure
     if (equal(not(a), b)) return False
+
+    // principle of explosion
+    //if (equal(a, False)) return True
 
     // none of the rules can be applied
     return b
