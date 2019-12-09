@@ -94,7 +94,7 @@ function evalCommand (line, state: ReplState) {
     case 'assert': {
       const a = parseStatement(args.splice(1).join(' ').trim(), state)
       if (a) {
-        assert(deduce(state.antecedent, a), state)
+        assert(a, state)
       }
       else {
         state.formatter.emit(`usage: .assert a`).br()
@@ -107,7 +107,7 @@ function evalCommand (line, state: ReplState) {
       const a = parseStatement(terms[0].trim(), state)
       const b = parseStatement(terms[1].trim(), state)
       if (a && b) {
-        assertEquality(deduce(state.antecedent, a), deduce(state.antecedent, b), state)
+        assertEquality(a, b, state)
       }
       else {
         state.formatter.emit(`usage: .eq a, b`).br()
@@ -179,6 +179,8 @@ function assert (a: Model, state: ReplState) {
 }
 
 function assertEquality (a: Model, b: Model, state: ReplState) {
+  a = deduce(state.antecedent, a)
+  b = deduce(state.antecedent, b)
   state.assertions++
   try {
     if (equal(a, b)) {
