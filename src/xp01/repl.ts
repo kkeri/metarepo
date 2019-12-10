@@ -52,7 +52,7 @@ export function repl (
   rl.prompt(true)
   rl.on('line', (line) => {
     try {
-      evalLine(line, state)
+      processLine(line, state)
     } catch (e) {
       state.formatter.emit(e).br()
     }
@@ -63,7 +63,7 @@ export function repl (
   })
 }
 
-function evalLine (line, state: ReplState) {
+function processLine (line, state: ReplState) {
   line = line.trim()
   if (line.length === 0) {
     // skip empty lines
@@ -71,14 +71,14 @@ function evalLine (line, state: ReplState) {
     // skip comment lines starting with //
   } else if (/^\.[a-zA-Z]/.test(line)) {
     // commands start with .
-    evalCommand(line, state)
+    processCommand(line, state)
   } else {
     // everything else goes to the interpreter
-    evalStatement(line, state)
+    processStatement(line, state)
   }
 }
 
-function evalCommand (line, state: ReplState) {
+function processCommand (line, state: ReplState) {
   let args: string[] = line.trim().substr(1).split(/\s+/)
   switch (args[0]) {
 
@@ -138,14 +138,16 @@ function evalCommand (line, state: ReplState) {
   }
 }
 
-function evalStatement (str: string, state: ReplState) {
+function processStatement (str: string, state: ReplState) {
   const stmt = parseStatement(str, state)
   if (stmt) {
     append(stmt, state)
   }
 }
 
-// A single iteration of the incremental proof process.
+// Deduces a proposition from the set of premises and adds the result
+// to the premises.
+// This is a single iteration of incremental development.
 function append (a: Model, state: ReplState) {
   try {
     const result = deduce(state.premises, a)
