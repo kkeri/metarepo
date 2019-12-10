@@ -48,6 +48,7 @@ export function repl (
     failures: 0,
     exit: () => rl.close()
   }
+  output.write(`XP01 - Type .h for help.\n`)
   rl.prompt(true)
   rl.on('line', (line) => {
     try {
@@ -165,13 +166,14 @@ function assert (a: Model, state: ReplState) {
     state.assertions++
     const result = deduce(state.premises, a)
     if (equal(result, True)) {
+      state.formatter.emit(`success`)
       return
     }
     else {
       state.failures++
       state.formatter.emit(`assertion failed: `)
       printModel(a, state).br()
-      state.formatter.emit(`result: `)
+      state.formatter.emit(`required   : `)
       printModel(result, state).br()
     }
   }
@@ -239,8 +241,8 @@ function printModel (obj, state: ReplState) {
 
 function help (state: ReplState) {
   state.formatter.emit(`
-  .l, .list           Lists set of premises
-  .r, .reset          Clears premises
+  .l, .list           Lists the set of premises
+  .r, .reset          Clears the set of premises
   .a, .assert <p>     Prints error message if <p> is not true
   .eq <p1>, <p2>      Prints error message if <p1> is not equal to <p2>
   .summary            Prints a summary of assertions and exits on failure
