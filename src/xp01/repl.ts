@@ -29,8 +29,7 @@ const formatOptions = {
 interface ReplState {
   parser: OhmParser
   formatter: PrettyFormatter
-  // output: stream.Writable
-  antecedent: Model
+  premises: Model
   assertions: number
   failures: number
   exit: (() => void)
@@ -44,8 +43,7 @@ export function repl (
   const state: ReplState = {
     parser: createParser(nf),
     formatter: new PrettyFormatter(output, 0, formatOptions),
-    // output,
-    antecedent: True,
+    premises: True,
     assertions: 0,
     failures: 0,
     exit: () => rl.close()
@@ -67,9 +65,9 @@ export function repl (
 function evalLine (line, state: ReplState) {
   line = line.trim()
   if (line.length === 0) {
-    // do nothing with an empty line
+    // skip empty lines
   } else if (/^.*\/\//.test(line)) {
-    // skip comments starting with #
+    // skip comment lines starting with //
   } else if (/^\.[a-zA-Z]/.test(line)) {
     // commands start with .
     evalCommand(line, state)
@@ -83,11 +81,14 @@ function evalCommand (line, state: ReplState) {
   let args: string[] = line.trim().substr(1).split(/\s+/)
   switch (args[0]) {
 
-    // inspect
+    case 'h':
+    case 'help':
+      help(state)
+      break
 
     case 'l':
     case 'list':
-      printAntecedent(state)
+      listPremises(state)
       break
 
     case 'a':
@@ -115,20 +116,16 @@ function evalCommand (line, state: ReplState) {
       break
     }
 
-    // modify
-
-    case 'r':
-    case 'reset':
-      state.antecedent = True
-      state.formatter.emit('----------------').br()
-      break
-
-    // other
-
     case 'summary':
       if (state.failures) {
         state.formatter.emit(`${state.failures} of ${state.assertions} assertions have failed`).br()
       }
+      break
+
+    case 'r':
+    case 'reset':
+      state.premises = True
+      state.formatter.emit('----------------').br()
       break
 
     case 'x':
@@ -147,21 +144,26 @@ function evalStatement (str: string, state: ReplState) {
   }
 }
 
+// A single iteration of the incremental proof process.
 function append (a: Model, state: ReplState) {
   try {
-    const result = deduce(state.antecedent, a)
+    const result = deduce(state.premises, a)
     printModel(result, state).br()
-    state.antecedent = nf.and(state.antecedent, result)
+    state.premises = nf.and(state.premises, result)
   }
   catch (e) {
     state.formatter.emit(e.toString()).br()
   }
 }
 
+
+// assertions
+
+
 function assert (a: Model, state: ReplState) {
-  state.assertions++
   try {
-    const result = deduce(state.antecedent, a)
+    state.assertions++
+    const result = deduce(state.premises, a)
     if (equal(result, True)) {
       return
     }
@@ -179,10 +181,11 @@ function assert (a: Model, state: ReplState) {
 }
 
 function assertEquality (a: Model, b: Model, state: ReplState) {
-  a = deduce(state.antecedent, a)
-  b = deduce(state.antecedent, b)
-  state.assertions++
   try {
+    a = deduce(state.premises, a)
+    b = deduce(state.premises, b)
+    state.assertions++
+
     if (equal(a, b)) {
       return
     }
@@ -199,6 +202,10 @@ function assertEquality (a: Model, b: Model, state: ReplState) {
   }
 }
 
+
+// helper functions
+
+
 function parseStatement (str: string, state: ReplState) {
   const diag = new Diagnostics()
   const stmt = state.parser.parse(str, { diag, rule: 'Statement' })
@@ -210,12 +217,12 @@ function parseStatement (str: string, state: ReplState) {
   return stmt
 }
 
-function printAntecedent (state: ReplState) {
-  if (state.antecedent instanceof And) {
-    for (const elem of state.antecedent) printModel(elem, state).br()
+function listPremises (state: ReplState) {
+  if (state.premises instanceof And) {
+    for (const elem of state.premises) printModel(elem, state).br()
   }
   else {
-    printModel(state.antecedent, state).br()
+    printModel(state.premises, state).br()
   }
   return state.formatter
 }
@@ -228,4 +235,16 @@ function printModel (obj, state: ReplState) {
   })
   printer.print(obj)
   return state.formatter
+}
+
+function help (state: ReplState) {
+  state.formatter.emit(`
+  .l, .list           Lists set of premises
+  .r, .reset          Clears premises
+  .a, .assert <p>     Prints error message if <p> is not true
+  .eq <p1>, <p2>      Prints error message if <p1> is not equal to <p2>
+  .summary            Prints a summary of assertions and exits on failure
+  .h, .help           Prints the list of commands
+  .x, .exit           Quits read-eval-print loop
+`).br()
 }
