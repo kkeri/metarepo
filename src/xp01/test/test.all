@@ -117,4 +117,17 @@ a /\ (~a\/c)
 .p ~a
 .r
 
+// composition-like 1
+
+a
+((~a\/b)/\(~a\/c))
+.p b/\c
+
+// composition-like 2
+
+((~a\/b)/\(~a\/c))
+a
+.p b/\c
+
+
 .summary
