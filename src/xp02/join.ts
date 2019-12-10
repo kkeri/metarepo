@@ -1,5 +1,5 @@
-import { BinaryDispatcher } from './dispatcher';
-import { BinaryOperation, Model } from './types';
+import { BinaryDispatcher } from './dispatcher'
+import { BinaryOperation, Model } from './types'
 import * as model from './model'
 
 export function createJoin (
@@ -20,6 +20,6 @@ export const joinDispatcher = new BinaryDispatcher<BinaryOperation>()
   })
   .addClasses(model, {
     Missing: (a: model.Missing, b: model.Missing) => {
-      return new model.Missing(new model.Or(a.a, b.a))
+      return new model.Missing(new model.Or(a.a, b.a, a.a.rank))
     },
   })

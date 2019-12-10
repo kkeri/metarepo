@@ -1,9 +1,10 @@
 import { EventEmitter } from 'events'
 import stream = require('stream')
-import { BinaryDispatcher } from './dispatcher'
 
 export interface Model {
   rank: Rank | null
+  // Simple structural equality.
+  equals (other: Model, equal: BinaryPredicate): boolean
 }
 
 export interface NormalModel extends Model {
@@ -20,6 +21,9 @@ export enum Rank {
 
 export type UnaryOperation = (a: Model) => Model
 export type BinaryOperation = (a: Model, b: Model) => Model
+
+export type UnaryPredicate = (a: Model) => boolean
+export type BinaryPredicate = (a: Model, b: Model) => boolean
 
 export interface Context {
   join: BinaryOperation

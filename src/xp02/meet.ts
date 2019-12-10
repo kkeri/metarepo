@@ -1,5 +1,5 @@
-import { BinaryDispatcher } from './dispatcher';
-import { Model, BinaryOperation } from './types';
+import { BinaryDispatcher } from './dispatcher'
+import { Model, BinaryOperation } from './types'
 import * as model from './model'
 
 export function createMeet (
@@ -21,6 +21,6 @@ export const meetDispatcher = new BinaryDispatcher<(a: Model, b: Model) => Model
   .addClasses(model, {
 
     Missing: (a: model.Missing, b: model.Missing) => {
-      return new model.Missing(new model.And(a.a, b.a))
+      return new model.Missing(new model.And(a.a, b.a, a.a.rank))
     },
   })

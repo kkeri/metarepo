@@ -2,7 +2,7 @@ import { test } from 'tap'
 import { Model } from '../types'
 import { Diagnostics } from '../../util/diag'
 import { ohmParser } from '../ohmParser'
-import { ParseContext, parse } from '../parser'
+import { ParseContext, parse } from '../parse'
 import { createStateStorage } from '../useState'
 import { parseRules } from '../parseRules'
 import * as model from '../model'
@@ -28,14 +28,14 @@ function xpParse (model: Model, source: string): Model {
   return parse(parseCtx, model)
 }
 
-test('Null', t => {
+test('NullType', t => {
   t.type(xpParse(new model.NullType(), ''), model.Missing)
   t.type(xpParse(new model.NullType(), 'ul'), model.Missing)
   t.type(xpParse(new model.NullType(), 'null'), model.NullConstant)
   t.end()
 })
 
-test('Boolean', t => {
+test('BooleanType', t => {
   t.type(xpParse(new model.BooleanType(), ''), model.Missing)
   t.type(xpParse(new model.BooleanType(), '.'), model.Missing)
   t.same(xpParse(new model.BooleanType(), 'true'), new model.BooleanConstant(true))
@@ -44,7 +44,7 @@ test('Boolean', t => {
   t.end()
 })
 
-test('Number', t => {
+test('NumberType', t => {
   t.type(xpParse(new model.NumberType(), ''), model.Missing)
   t.type(xpParse(new model.NumberType(), '.'), model.Missing)
   t.same(xpParse(new model.NumberType(), '1'), new model.NumberConstant(1))
@@ -53,13 +53,23 @@ test('Number', t => {
   t.end()
 })
 
-test('Name', t => {
+test('NameType', t => {
   t.same(xpParse(new model.NameType(), ''), new model.Missing(new model.NameType()))
   t.same(xpParse(new model.NameType(), '.'), new model.Missing(new model.NameType()))
   t.same(xpParse(new model.NameType(), '3'), new model.Missing(new model.NameType()))
   t.same(xpParse(new model.NameType(), 'a'), new model.NameConstant('a'))
   t.same(xpParse(new model.NameType(), 'abc123'), new model.NameConstant('abc123'))
   t.same(xpParse(new model.NameType(), '_'), new model.NameConstant('_'))
+  t.end()
+})
+
+test('RegExpConstant', t => {
+  const s1 = new model.RegExpConstant(/abc|123/)
+  t.same(xpParse(s1, ''), new model.Missing(s1))
+  t.same(xpParse(s1, '.'), new model.Missing(s1))
+  t.same(xpParse(s1, 'abc'), new model.StringConstant('abc'))
+  t.same(xpParse(s1, '123'), new model.StringConstant('123'))
+  t.same(xpParse(s1, 'abc123'), new model.StringConstant('abc'))
   t.end()
 })
 

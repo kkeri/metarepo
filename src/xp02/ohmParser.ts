@@ -35,7 +35,7 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
     return new model.MemberRef(left.model(), right.model())
   },
   Name (ident) {
-    return new model.Name(ident.model())
+    return new model.NameConstant(ident.model())
   },
 
   // lexer

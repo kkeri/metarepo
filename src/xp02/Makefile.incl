@@ -1,9 +1,14 @@
 
-xp02 xp02-all: ts xp02-parser
+xp02 xp02-all: xp02-parser
+	tsc -p src/xp02
+
+xp02-watch:
+	tsc -w -p src/xp02
 
 xp02-parser: lib/xp02/xp02-recipe.js
 
 lib/xp02/xp02-recipe.js: src/xp02/xp02.ohm
+	mkdir -p lib/xp02
 	script/build-ohm.js $< $@
 
 xp02-test:

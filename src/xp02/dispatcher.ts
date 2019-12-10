@@ -34,6 +34,11 @@ export class UnaryDispatcher<T> {
     }
     return this
   }
+
+  addClass (ctor, value: T) {
+    this.map.set(ctor.prototype, value)
+    return this
+  }
 }
 
 export class BinaryDispatcher<T> {
@@ -59,7 +64,6 @@ export class BinaryDispatcher<T> {
   }
 
   addClass (ctor, value: T) {
-    assert(ctor, `constructor ${ctor.name} is not found`)
     this.addPair(ctor.prototype, ctor.prototype, value)
     return this
   }
