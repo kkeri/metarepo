@@ -79,8 +79,9 @@ function processLine (line, state: ReplState) {
 }
 
 function processCommand (line, state: ReplState) {
-  let args: string[] = line.trim().substr(1).split(/\s+/)
-  switch (args[0]) {
+  const parts: string[] = line.trim().substr(1).split(/\s+/)
+  const args: string[] = parts.splice(1).join(' ').split(',').map(arg => arg.trim())
+  switch (parts[0]) {
 
     case 'h':
     case 'help':
@@ -94,7 +95,7 @@ function processCommand (line, state: ReplState) {
 
     case 'p':
     case 'prove': {
-      const a = parseStatement(args.splice(1).join(' ').trim(), state)
+      const a = parseStatement(args[0], state)
       if (a) {
         prove(a, state)
       }
@@ -105,9 +106,8 @@ function processCommand (line, state: ReplState) {
     }
 
     case 'eq': {
-      const terms = args.splice(1).join(' ').split(',')
-      const a = parseStatement(terms[0].trim(), state)
-      const b = parseStatement(terms[1].trim(), state)
+      const a = parseStatement(args[0], state)
+      const b = parseStatement(args[1], state)
       if (a && b) {
         assertEquality(a, b, state)
       }
