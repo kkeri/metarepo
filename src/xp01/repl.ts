@@ -92,14 +92,14 @@ function evalCommand (line, state: ReplState) {
       listPremises(state)
       break
 
-    case 'a':
-    case 'assert': {
+    case 'p':
+    case 'prove': {
       const a = parseStatement(args.splice(1).join(' ').trim(), state)
       if (a) {
-        assert(a, state)
+        prove(a, state)
       }
       else {
-        state.formatter.emit(`usage: .assert a`).br()
+        state.formatter.emit(`usage: .prove a`).br()
       }
       break
     }
@@ -161,19 +161,19 @@ function append (a: Model, state: ReplState) {
 // assertions
 
 
-function assert (a: Model, state: ReplState) {
+function prove (a: Model, state: ReplState) {
   try {
     state.assertions++
     const result = deduce(state.premises, a)
     if (equal(result, True)) {
-      state.formatter.emit(`success`)
+      state.formatter.emit(`success`).br()
       return
     }
     else {
       state.failures++
-      state.formatter.emit(`assertion failed: `)
+      state.formatter.emit(`failed to prove: `)
       printModel(a, state).br()
-      state.formatter.emit(`required   : `)
+      state.formatter.emit(`required       : `)
       printModel(result, state).br()
     }
   }
@@ -243,7 +243,7 @@ function help (state: ReplState) {
   state.formatter.emit(`
   .l, .list           Lists the set of premises
   .r, .reset          Clears the set of premises
-  .a, .assert <p>     Prints error message if <p> is not true
+  .p, .prove <p>      Prints error message if <p> is not true
   .eq <p1>, <p2>      Prints error message if <p1> is not equal to <p2>
   .summary            Prints a summary of assertions and exits on failure
   .h, .help           Prints the list of commands
