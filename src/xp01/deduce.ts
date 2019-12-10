@@ -1,6 +1,6 @@
-import { Model, Or, And, True, False } from './model';
-import { equal } from './equal';
-import { LogicalNormalForm, BinaryOp } from './types';
+import { Model, Or, And, True, False } from './model'
+import { equal } from './equal'
+import { LogicalNormalForm, BinaryOp } from './types'
 
 export function makeDeduce ({ or, and, not }: LogicalNormalForm): BinaryOp {
 

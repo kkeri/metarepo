@@ -1,4 +1,4 @@
-import stream = require('stream');
+import stream = require('stream')
 
 export interface PrettyFormatterOptions {
   indentSize?: number

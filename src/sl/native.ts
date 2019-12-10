@@ -1,5 +1,5 @@
-import { resolve, reflect } from './interpreter';
-import { Model, Context } from './iface';
+import { resolve, reflect } from './interpreter'
+import { Model, Context } from './iface'
 import * as model from './model'
 
 export class NativeFunction extends model.ModelClass {

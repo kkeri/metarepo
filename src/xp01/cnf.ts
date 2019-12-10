@@ -1,6 +1,6 @@
-import { Model, Or, And, Not, True, False } from './model';
-import { equal } from './equal';
-import { LogicalNormalForm } from './types';
+import { Model, Or, And, Not, True, False } from './model'
+import { equal } from './equal'
+import { LogicalNormalForm } from './types'
 
 // Conjunctive normal form
 

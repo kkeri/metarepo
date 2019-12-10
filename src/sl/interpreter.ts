@@ -1,5 +1,5 @@
 import * as model from './model'
-import { Model, Context, isRedex, Monoid } from './iface';
+import { Model, Context, isRedex, Monoid } from './iface'
 
 // Resolves an expression in an environment.
 // If the environment provides sufficient information,

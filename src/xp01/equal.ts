@@ -1,4 +1,4 @@
-import { Model, Or, And, Not, Name } from './model';
+import { Model, Or, And, Not, Name } from './model'
 
 // Syntactic equality
 export function equal (a: Model, b: Model): boolean {

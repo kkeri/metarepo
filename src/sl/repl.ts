@@ -1,16 +1,16 @@
-import * as colors from 'colors';
-import { EventEmitter } from 'events';
-import * as readline from 'readline';
-import { Diagnostics } from '../util/diag';
-import { PrettyFormatter } from '../util/format';
-import { Context, Model, Monoid } from './iface';
-import { resolve } from './interpreter';
-import * as model from './model';
-import { nativeDefs } from './native';
-import { parse } from './parser';
-import { printActions } from './printActions';
-import { ModelPrinter } from '../util/printer';
-import stream = require('stream');
+import * as colors from 'colors'
+import { EventEmitter } from 'events'
+import * as readline from 'readline'
+import { Diagnostics } from '../util/diag'
+import { PrettyFormatter } from '../util/format'
+import { Context, Model, Monoid } from './iface'
+import { resolve } from './interpreter'
+import * as model from './model'
+import { nativeDefs } from './native'
+import { parse } from './parser'
+import { printActions } from './printActions'
+import { ModelPrinter } from '../util/printer'
+import stream = require('stream')
 
 const formatOptions = {
   indentSize: 2,

@@ -1,5 +1,5 @@
-import { ActionMap } from './action';
-import { PrettyFormatter } from './format';
+import { ActionMap } from './action'
+import { PrettyFormatter } from './format'
 
 const idRegex = /^[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*$/
 

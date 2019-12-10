@@ -1,7 +1,7 @@
 import { join } from 'path'
 import * as model from './model'
-import { OhmParser } from '../util/ohmParser';
-import { LogicalNormalForm } from './types';
+import { OhmParser } from '../util/ohmParser'
+import { LogicalNormalForm } from './types'
 
 export function createParser ({ or, and, not }: LogicalNormalForm): OhmParser {
   return new OhmParser(join(__dirname, './xp01-recipe.js'), {

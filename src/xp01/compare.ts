@@ -1,5 +1,5 @@
-import { Model, Name } from './model';
-import { Comparison } from './types';
+import { Model, Name } from './model'
+import { Comparison } from './types'
 
 
 

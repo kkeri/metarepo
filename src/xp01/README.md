@@ -4,7 +4,7 @@ A minimalist proof system for propositional logic.
 
 ## Usage
 
-First, go to the repository directory.
+First, go to the main directory of the repository.
 
 Build:
 
@@ -14,10 +14,9 @@ Running tests:
 
     node lib/xp01/cli src/xp01/test/test.all
 
-To start the read-eval-print loop:
+Starting the read-eval-print loop:
 
     node lib/xp01/cli
-
 
 
 ## Discussion

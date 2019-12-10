@@ -1,6 +1,6 @@
-import { Model, Or, And, Not, True, False } from './model';
-import { compare } from './compare';
-import { LogicalNormalForm } from './types';
+import { Model, Or, And, Not, True, False } from './model'
+import { compare } from './compare'
+import { LogicalNormalForm } from './types'
 
 // Ordered normal form (unfinished)
 
@@ -48,7 +48,7 @@ function or (a: Model, b: Model) {
       case 0:
         if ((a instanceof Not) === (b instanceof Not)) {
           // idempotence
-          return a;
+          return a
         }
         else {
           // law of excluded middle
@@ -93,7 +93,7 @@ function and (a: Model, b: Model) {
         // reduce equal atoms
         if ((a instanceof Not) === (b instanceof Not)) {
           // idempotence
-          return a;
+          return a
         }
         else {
           // law of non-contradiction

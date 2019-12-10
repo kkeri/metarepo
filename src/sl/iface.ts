@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import stream = require('stream');
+import stream = require('stream')
 
 export interface Model {
   // The binding environment if the model is bound to one.

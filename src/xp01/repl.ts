@@ -1,15 +1,15 @@
-import * as colors from 'colors';
-import * as readline from 'readline';
-import { Diagnostics } from '../util/diag';
-import { PrettyFormatter } from '../util/format';
-import { OhmParser } from '../util/ohmParser';
-import { ModelPrinter } from '../util/printer';
-import { equal } from './equal';
-import { deduce, nf } from './interpreter';
-import { And, Model, True } from './model';
-import { createParser } from './parser';
-import { printActions } from './print';
-import stream = require('stream');
+import * as colors from 'colors'
+import * as readline from 'readline'
+import { Diagnostics } from '../util/diag'
+import { PrettyFormatter } from '../util/format'
+import { OhmParser } from '../util/ohmParser'
+import { ModelPrinter } from '../util/printer'
+import { equal } from './equal'
+import { deduce, nf } from './interpreter'
+import { And, Model, True } from './model'
+import { createParser } from './parser'
+import { printActions } from './print'
+import stream = require('stream')
 
 export const styles = {
   operator: colors.cyan,

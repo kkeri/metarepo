@@ -1,5 +1,5 @@
-import { Context, isApplicable, isRedex, Model, Monoid, Rank } from './iface';
-import { apply, choose, equal, resolve, reflect, join, meet, thunk, createContext } from './interpreter';
+import { Context, isApplicable, isRedex, Model, Monoid, Rank } from './iface'
+import { apply, choose, equal, resolve, reflect, join, meet, thunk, createContext } from './interpreter'
 
 
 // Obsoleted, use only as a reminder
