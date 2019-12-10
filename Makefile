@@ -10,13 +10,19 @@ project_names = $(notdir $(project_paths))
 
 all: $(project_names)
 
+clean:
+	rm -rf bin lib
+
 ts:
 	tsc -p .
 
 ts-watch:
 	tsc -w -p .
 
+bindir:
+	mkdir -p bin
+
 libdir:
-	mkdir lib
+	mkdir -p lib
 
 include $(project_paths:%=%/Makefile.incl)

@@ -1,5 +1,6 @@
-xp01 xp01-all: xp01-parser
+xp01 xp01-all: xp01-parser libdir bindir
 	tsc -p src/xp01
+	cp src/starter bin/xp01
 
 xp01-watch:
 	tsc -w -p src/xp01
