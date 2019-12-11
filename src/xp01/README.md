@@ -2,38 +2,101 @@
 
 A minimalist proof system for propositional logic.
 
+Disclaimer: the algorithm is "mostly" correct, which means that it gives
+incorrect result for certain cases, but I believe it can be fixed.
+Run tests to get ideas what is broken (hint: proofs involving implication).
+
 ## Usage
 
 First, go to the main directory of the repository.
 
-Build:
+Building the project:
 
     make xp01
 
 Running tests:
 
-    node lib/xp01/cli src/xp01/test/test.all
+    bin/xp01 src/xp01/test/test.all
 
-Starting the read-eval-print loop:
+The read-eval-print loop is started by the command
 
-    node lib/xp01/cli
+    bin/xp01
+
+## The read-eval-print loop
+
+At the prompt, the user can type propositions and commands. Commands begin
+with the `.` character, any other input is interpreted as a proposition.
+When the user enters a proposition, the program tries to prove it from the
+current set of premises, which is empty in the beginning.
+The result is written in the next line. For example:
+
+~~~
+>p
+p
+>q
+q
+>p/\q
+true
+~~~
+
+The proof algorithm is implemented as a rewrite system with partial 
+evaluation-like semantics, so the result is not necessarily true or false
+but can be any proposition (see the discussion below).
+The resulting proposition is added to the set of premises and used in the
+following proofs.
+
+### Commands
+
+
+~~~
+  .l, .list           Lists the set of premises
+  .r, .reset          Clears the set of premises
+  .p, .prove <p>      Prints error message if <p> is not true
+  .eq <p1>, <p2>      Prints error message if <p1> is not equal to <p2>
+  .summary            Prints a summary of assertions and exits on failure
+  .h, .help           Prints the list of commands
+  .x, .exit           Quits read-eval-print loop
+~~~
+
+Using the assertions `.p` and `.eq` the user can test assumptions without
+adding them to the premises. The `.r` commands clears all premises.
+Sometimes it helps to list the current premises using the command `.l`.
+
+### Proposition syntax
+
+~~~
+Prop ::= true, false     Truth values
+       | p               Atom, can be any usual variable name
+       | (Prop)          Parentheses
+       | ~Prop           Negation
+       | Prop /\ Prop    Conjunction
+       | Prop \/ Prop    Disjunction
+~~~
+
+Precedence of operators: `~`, `/\`, `\/`.
+Implication is not in the language but it can be expressed as `~p\/q`.
 
 
 ## Discussion
 
-The goal of this experiment is to implement a proof system as a rewriting system.
-In other words, I attempt to construct a framework where *deduction* and
-*reduction* (finding a normal form) are formally identical.
-This is an ambitious goal, because a successful implementation would be
-a significant step towards my realization of the phrase *proofs as programs*
+### Motivation
+
+The goal of this project is to implement a simple theorem prover as
+a rewriting system.
+In other words, to construct a framework where *deduction* and *reduction*
+(finding a normal form) are formally identical. This would be
+a step towards my realization of the principle *proofs as programs*
 which is associated with the Curry-Howard correspondence.
 
 Propositional logic seems to be a good choice for discovering this
-technique as it is simple and decidable but requires an axiom schemata.
+technique as it is simple and decidable. I see it as a starting point
+before targeting more expressive calculi.
 
-In order to achieve my goal, I represent sequences of well-formed formulae
-as expressions built from binary operations. To keep the system as minimal
-as possible, the sequencing operator is identified with logical conjunction,
+### Implementation
+
+In order to achieve my goal, I represent sequences of well-formed propositions
+as trees built of binary operations. To keep the system as minimal
+as possible, the sequence operator is identified with logical conjunction,
 considering the similarity of the two concepts, i.e.
 
 - A conjunction is true iff both operands are true.
@@ -41,19 +104,20 @@ considering the similarity of the two concepts, i.e.
 - A conclusion is true if both (all) of its premises are true and there is
   a rule of inference that produces the conclusion from the premises.
 
-It is important to distinguish the meta level (the proof process) from the
-object level (the language of propositions), and I'm aware of the risk
-of the mentioned simplification.
-Another simplification is using the constant `True` to indicate a successful
-proof and `False` to indicate failure.
-One of the goals of this experiment is help to find the minimal "distance"
-to keep between the object level and the meta level to save the system
-from collapsing into triviality. Propositional logic is possibly more
-tolerant in this respect than more expressive calculi.
+I know it is important to distinguish the meta theory (the proof process) from
+the object theory (the language of propositions), and I'm aware of the risk
+of this simplification.
+Another simplification is using the constant `True` to represent a successful
+proof and `False` to represent failure.
+
+One of my goals is to find the minimal "distance" to keep between the object
+theory and the meta theory without collapsing the deduction system.
+I speculate that propositional logic is more tolerant in this respect than
+more complex calculi.
 
 In order to realize the correspondence of proofs and normalization, we have to
-change the notion of proof a bit. Traditionally a proof process answers a
-closed-ended question (yes-no question).
+shift the notion of proof a bit. Traditionally a proof answers a
+closed-ended question (yes or no).
 A successful derivation means that the target proposition is true in the
 examined formal system.
 This experiment applies a reductionist approach to proofs, where
@@ -68,102 +132,108 @@ syntactic consequence of the set of premises.
 If the target proposition directly contradicts some of the premises,
 the algorithm returns `False`. Otherwise it returns a proposition
 that must be added to the set of premises to make the consequence true.
-Interestingly, such an algorithm would amount to an automated theorem prover
-which sounds too much of an achievement for a simple program like this.
 
 ### The deduction operator
 
-The proof algorithm is based on a deduction operation *|>*. The operation is
-implemented as a number of rewrite rules.
+The proof algorithm is based on a deduction operation `|>`.
+The operation is implemented as a list of rewrite rules
+(`->` denotes the rewrite operation.)
 
 ~~~
-A |> (B /\ C) -> (A |> B) /\ (A |> C)  -- Conjunction introduction
+A |> (B /\ C) -> norm((A |> B) /\ (A |> C))  -- Conjunction introduction
 
-(A /\ B) |> C -> (A |> C) \/ (B |> C)  -- Conjunction elimination
+(A /\ B) |> C -> norm((A |> C) \/ (B |> C))  -- Conjunction elimination
 
-A |> (B \/ C) -> (A |> B) \/ (A |> C)  -- Disjunction introduction
+A |> (B \/ C) -> norm((A |> B) \/ (A |> C))  -- Disjunction introduction
 
-(A \/ B) |> C -> (A |> C) /\ (B |> C)  -- Disjunction elimination
+(A \/ B) |> C -> norm((A |> C) /\ (B |> C))  -- Disjunction elimination
 
-A |> A -> True                         -- Success
+A |> A -> True                               -- Success
 
-A |> ~A -> False                       -- Failure
+A |> ~A -> False                             -- Failure
 ~~~
 
 The first four rules resemble the corresponding inference rules of natural
-deduction and sequent calculus.
+deduction, and also sequent calculus.
 The *success* case is a simple unification algorithm together with syntactic
-equality. I'm not sure about the *failure* case though.
-If the rules are tried in the listed order, it is sufficient to
-implement syntactic equality only on literals of the form `A` and `~A`.
+equality.
+I'm not sure about the role and necessity of the *failure* case though, which
+also involves syntactic equality.
 
-If none of the rules could be applied to the operands, the right side
-operand is returned.
+If none of the rules can be applied to the operands, the right side
+operand is returned. This is the key to partial evaluation. 
 
-The deduction operation 'mixes' its operands but the output
-is generally larger than the operands, so we need more rules in order to reduce
-the size of the output. Hence each application of the deduction operator
-is followed by a normalization step `norm`.
-For this purpose I tried both conjunctive and disjunctive normal forms and
-a third one called 'ordered normal form' which I made up myself.
+> In principle, the full operation `A |> B` should be returned,
+> but there is no variable binding in the language, so there is no way
+> to "pump more information" into `A` to make the operation successful
+> later on, even if more axioms are added to the premises.
 
-### The interactive interface
+The output of the deduction operation is generally larger than the operands,
+so we need to reduce the output.
+Hence each application of the deduction operator is finished by
+a normalization step `norm`.
+For this purpose I tried both conjunctive and disjunctive normal forms and I
+also experimented with a third (unfinished) one, called *ordered normal form*.
 
-The deduction operation is embedded into an interactive process, by which
+### Interactive development process
+
+The deduction operation is embedded into an interactive process by which
 the user can incrementally build a formal system.
 The interactive environment (called read-eval-print loop in Lisp jargon)
 keeps track of the current set of premises in form of a normalized proposition
-(remember that the sequencing operator is logical conjunction.)
+(remember that the sequence operator is logical conjunction.)
 The initial premise is `True`, the unit of conjunction.
 
 An iteration of the build process goes like this:
 
 1. The user enters a proposition *S*.
 2. The program calls the deduction operation with the set of premises *E*
-   on the left side and the new proposition *S* on the right side and
-   the result is normalized.
+   on the left side and the new proposition *S* on the right side.
 
-   N = norm(E |> S)
+   N = E |> S
 
-3. The normalized proposition *N* is printed to the screen.
+3. The deduced proposition *N* is printed to the output.
 4. The new set of premises is computed by normalizing the conjunction of the
-   old premises and the normalized proposition.
+   old premises and the deduced proposition.
    
    E' = norm(E /\ N)
 
-This incremental process is very natural.
+The incremental development process comes naturally.
 If the user enters independent formulae (none of which can be derived from
 the others), they are preserved and one can think of them like a set of
 axioms.
 If the user enters a proposition that is a theorem in the formal system,
-it is (ideally) reduces to the constant `True` and the set of premises
+it is (ideally) reduced to the constant `True` and the set of premises
 remains intact. For example:
 
 ~~~
-> A
-A
-> B
-B
-> A /\ B
+> a
+a
+> b
+b
+> .list
+a
+b
+> a /\ b
 true
+> .list
+a
+b
 ~~~
 
 If the user enters a proposition that contradicts the premises, the set of
 premises *collapses* into the constant *False*, what is a terminal state.
 
-The `.assert <S>` command allows the user to verify that a proposition
-is a theorem without appending it to the set of premises.
-If the normal form of *S* is `true`, the assertion succeeds, otherwise it fails,
-temporarily switching back to complete evaluation. 
+The `.prove P` command allows the user to verify if `P` is a theorem
+without appending it to the set of premises.
+If the normal form of *P* is `True`, the assertion succeeds, otherwise it fails,
+temporarily falling back to complete evaluation. 
 
-The `|>` deduction operator does not appear on the interactive interface,
-it is encoded into the workflow. The user reads and writes only propositional
-terms. Note that implication `->` is not part of the language, it must be
-expressed using negation and disjunction, e.g. `~A \/ B`.
 
-## Conclusions
+## Conclusion
 
-The algorithm is promising, but not flawless.
+The algorithm looks promising, even if not correct yet.
+
 I made a test input file that includes many basic derivations. Most of them
 succeeds, but a few fails. For example:
 
@@ -188,7 +258,7 @@ a
 > .eq c, true
 ~~~
 
-Locally, it is clear what happened.
+Locally, it is clear what is going on.
 
 ~~~
 ~a \/ c |> a
@@ -210,21 +280,14 @@ Anyway, Curry-Howard is usually associated with the latter.
 
 Notably, the current set of deduction rules don't manifest the
 *principle of explosion*, which would be required in case of classical logic.
-I tried to add it explicitly, but it didn't correct failed cases, so I removed it. 
+I tried to add it explicitly, but it didn't fix failed cases, so I removed it. 
 
 Both the deduction operator and the normalizer contains inference rules,
-and I'm uncertain when I have to explain why does a particular rule belong
+and I can't confidently explain why does a particular rule belong
 to one or the other, and does it make sense to distinguish them at all.
 
-Surprisingly, all three normal form performed identically.
+Surprisingly, all three normal form performed identically with the current set
+of rules.
 
-The deduction operator is distributive over conjunction and disjunction.
-It has the effect of *mixing* its two operands as deeply
-as possible, playing a role similar to the *permutation* rule in
-sequent calculus, while the *success* case is similar to *contraction*.
-
-A follow-up experiment has to answer the following:
-
-- Should I keep LEM and double negation elimination?
-- Is it justified to separate the deduction operator from the normalizer?
-- What are the minimal requirements for a suitable normal form?
+Correction of the algorithm may require cleaner separation of the
+object and the meta theory.
