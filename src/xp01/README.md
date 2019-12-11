@@ -10,15 +10,15 @@ Run tests to get ideas what is broken (hint: proofs involving implication).
 
 First, go to the main directory of the repository.
 
-Building the project:
+Build the project:
 
     make xp01
 
-Running tests:
+Run tests:
 
     bin/xp01 src/xp01/test/test.all
 
-The read-eval-print loop is started by the command
+Start the read-eval-print loop:
 
     bin/xp01
 
@@ -40,7 +40,7 @@ true
 ~~~
 
 The proof algorithm is implemented as a rewrite system with partial 
-evaluation-like semantics, so the result is not necessarily true or false
+evaluation-like semantics, so the result is not necessarily *true* or *false*
 but can be any proposition (see the discussion below).
 The resulting proposition is added to the set of premises and used in the
 following proofs.
@@ -131,7 +131,7 @@ Ideally the proof algorithm returns `True` if the target proposition is
 syntactic consequence of the set of premises.
 If the target proposition directly contradicts some of the premises,
 the algorithm returns `False`. Otherwise it returns a proposition
-that must be added to the set of premises to make the consequence true.
+that, together with the premises, makes the consequence true.
 
 ### The deduction operator
 
@@ -157,8 +157,8 @@ The first four rules resemble the corresponding inference rules of natural
 deduction, and also sequent calculus.
 The *success* case is a simple unification algorithm together with syntactic
 equality.
-I'm not sure about the role and necessity of the *failure* case though, which
-also involves syntactic equality.
+I'm not confident about the role and necessity of the *failure* case though,
+which also involves syntactic equality.
 
 If none of the rules can be applied to the operands, the right side
 operand is returned. This is the key to partial evaluation. 
@@ -169,18 +169,19 @@ operand is returned. This is the key to partial evaluation.
 > later on, even if more axioms are added to the premises.
 
 The output of the deduction operation is generally larger than the operands,
-so we need to reduce the output.
+so it must be reduced.
 Hence each application of the deduction operator is finished by
 a normalization step `norm`.
 For this purpose I tried both conjunctive and disjunctive normal forms and I
-also experimented with a third (unfinished) one, called *ordered normal form*.
+also experimented with a third (unfinished) one, which I call
+*ordered normal form*. Choice of normal form is hard wired into the code.
 
 ### Interactive development process
 
 The deduction operation is embedded into an interactive process by which
 the user can incrementally build a formal system.
-The interactive environment (called read-eval-print loop in Lisp jargon)
-keeps track of the current set of premises in form of a normalized proposition
+The interactive environment keeps track of the current set of premises
+in the form of a normalized proposition
 (remember that the sequence operator is logical conjunction.)
 The initial premise is `True`, the unit of conjunction.
 
@@ -199,9 +200,9 @@ An iteration of the build process goes like this:
    E' = norm(E /\ N)
 
 The incremental development process comes naturally.
-If the user enters independent formulae (none of which can be derived from
-the others), they are preserved and one can think of them like a set of
-axioms.
+If the user enters independent propositions (none of which can be derived from
+the others), they are preserved in the premises and one can think of them
+as a set of axioms.
 If the user enters a proposition that is a theorem in the formal system,
 it is (ideally) reduced to the constant `True` and the set of premises
 remains intact. For example:
@@ -222,7 +223,7 @@ b
 ~~~
 
 If the user enters a proposition that contradicts the premises, the set of
-premises *collapses* into the constant *False*, what is a terminal state.
+premises *collapses* into the constant `False`, what is a terminal state.
 
 The `.prove P` command allows the user to verify if `P` is a theorem
 without appending it to the set of premises.
@@ -244,8 +245,9 @@ succeeds, but a few fails. For example:
 ~a \/ c
 > a
 false
-> .eq c, true
-assertion failed: c != false
+> .p c
+failed to prove: c
+required       : c
 ~~~
 
 where the expected behavior would be
@@ -255,7 +257,8 @@ where the expected behavior would be
 ~a \/ c
 > a
 a
-> .eq c, true
+> .p c
+success
 ~~~
 
 Locally, it is clear what is going on.
@@ -263,14 +266,15 @@ Locally, it is clear what is going on.
 ~~~
 ~a \/ c |> a
  -> (~a |> a) /\ (c |> a)     // by disjunction elimination
- -> false /\ a                // by success and failure
+ -> false /\ (c |> a)         // by failure
+ -> false /\ a                // by the default case
  -> false                     // by normalization
 ~~~
 
 The *disjunction elimination* rule intuitively seems correct.
 It is in accordance with the similar rule in natural deduction.
 The culprit is the *failure* case. If I omit it, modus ponens succeeds,
-but both cases of disjunction elimination fails.
+although both cases of disjunction elimination fails.
 At this point I resort to trial and error what is not satisfactory.
 
 Until now I didn't specify which version of the propositional calculus I wanted
