@@ -242,7 +242,7 @@ succeeds, but a few fails. For example:
 ~a \/ c
 > a
 false
-> .p c
+> .prove c
 failed to prove: c
 required       : c
 ~~~
@@ -254,7 +254,7 @@ where the expected behavior would be
 ~a \/ c
 > a
 a
-> .p c
+> .prove c
 success
 ~~~
 
