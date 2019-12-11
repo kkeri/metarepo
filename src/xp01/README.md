@@ -8,11 +8,8 @@ Run tests to get ideas what is broken (hint: proofs involving implication).
 
 ## Usage
 
-First, go to the main directory of the repository.
-
-Build the project:
-
-    make xp01
+Go to the main directory of the repository.
+For build instructions see the [main readme file](../../README.md).
 
 Run tests:
 

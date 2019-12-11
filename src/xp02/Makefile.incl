@@ -1,9 +1,9 @@
 
-xp02 xp02-all: xp02-parser
-	tsc -p src/xp02
+xp02 xp02-all: xp02-parser bindir libdir
+	$(TSC) -p src/xp02
 
 xp02-watch:
-	tsc -w -p src/xp02
+	$(TSC) -w -p src/xp02
 
 xp02-parser: lib/xp02/xp02-recipe.js
 

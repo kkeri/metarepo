@@ -13,7 +13,13 @@ The projects are written in JavaScript/TypeScript, and you need to install
 __node.js__ to build and run them. Node v8 or higher is recommended.
 On Windows you will also need a Linux shell, e.g. git bash.
 
-Each `src/xp..` directory is a standalone project. They can be built from
+At the first time don't forget to install JavaScript dependencies.
+
+~~~
+npm i
+~~~
+
+Each `src/xp..` directory contains a standalone project. They can be built from
 the main directory. For example, to build XP01, type
 
 ~~~
