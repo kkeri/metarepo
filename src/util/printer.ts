@@ -3,6 +3,19 @@ import { PrettyFormatter } from './format'
 
 const idRegex = /^[_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*$/
 
+export interface Operator {
+  // precedence of the operator, natural number
+  precedence: number
+  fixity: 'in' | 'pre' | 'post'
+  // the printed appearance of the operator
+  symbol: string
+  // if true, the operation is parenthesized even if its precedence equals
+  // that of the parent operation.
+  parens?: boolean
+}
+
+export type OperatorMap = { [index: string]: Operator }
+
 export interface ModelPrinterArgs {
   formatter: PrettyFormatter
   actions: ActionMap,
@@ -83,17 +96,21 @@ export class ModelPrinter {
     return this
   }
 
-  operation (op, prec, a, b): this {
+  // Prints a binary operation.
+  //    parent - the parent operator or precedence of the parent operator
+  operation (op, parent: Operator | number | undefined, a, b): this {
+    let prec = (typeof parent === 'object') ? parent.precedence : parent || 0
+    if (op.parens && parent !== op) prec++
     if (op.precedence < prec) this.delimiter('(')
     switch (op.fixity) {
       case 'in':
-        this.print(a, op.precedence).operator(op).print(b, op.precedence)
+        this.print(a, op).operator(op).print(b, op)
         break
       case 'pre':
-        this.operator(op).print(a, op.precedence)
+        this.operator(op).print(a, op)
         break
       case 'post':
-        this.print(a, op.precedence).operator(op)
+        this.print(a, op).operator(op)
         break
     }
     if (op.precedence < prec) this.delimiter(')')
