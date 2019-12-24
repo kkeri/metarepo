@@ -1,11 +1,11 @@
-import { Model, Rank, Context } from './types'
+import { Model, Rank, Context, Forkable } from './types'
 import { UnaryDispatcher } from './dispatcher'
 
 export type ParserRule = (ctx: ParseContext, syntax: Model) => Model
 
 export type RestorePoint = number
 
-export interface ParseContext extends Context {
+export interface ParseContext extends Context, Forkable<ParseContext> {
   // The source text.
   source: string
   // Name of source for diagnostics.
@@ -14,6 +14,8 @@ export interface ParseContext extends Context {
   pos: number
   // A parser function for all model types.
   rules: UnaryDispatcher<ParserRule>
+  // Forks the context for choice
+  fork (): ParseContext
 }
 
 // parses a syntax model at the current position.

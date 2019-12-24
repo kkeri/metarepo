@@ -16,10 +16,10 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
   CommaList_default (left, op, right) {
     return new model.Or(left.model(), right.model())
   },
-  Join_default (left, op, right) {
+  Disjunction_default (left, op, right) {
     return new model.Or(left.model(), right.model())
   },
-  Meet_default (left, op, right) {
+  Conjunction_default (left, op, right) {
     return new model.And(left.model(), right.model())
   },
   BracketBlock (_lb_, body, _comma_, _rb_) {

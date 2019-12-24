@@ -1,4 +1,4 @@
-# Experiment 01
+# Experiment 02
 
 A programming language based on a program model.
 

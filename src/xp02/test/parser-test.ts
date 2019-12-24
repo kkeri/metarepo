@@ -20,10 +20,9 @@ function xpParse (model: Model, source: string): Model {
     sourceName: 'source',
     source,
     pos: 0,
-    join: createJoin(),
-    meet: createMeet(),
     useState: createStateStorage(),
     rules: parseRules,
+    fork (): ParseContext { return Object.create(this) }
   }
   return parse(parseCtx, model)
 }

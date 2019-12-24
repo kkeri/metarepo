@@ -25,9 +25,10 @@ export type BinaryOperation = (a: Model, b: Model) => Model
 export type UnaryPredicate = (a: Model) => boolean
 export type BinaryPredicate = (a: Model, b: Model) => boolean
 
+export type Combinator<Context> =
+  (a: (ctx: Context) => Model, b: (ctx: Context) => Model) => (ctx: Context) => Model
+
 export interface Context {
-  join: BinaryOperation
-  meet: BinaryOperation
   useState: UseStateFunction
 }
 
@@ -45,3 +46,16 @@ export interface reduceOptions {
   stdin?: stream.Writable
   stdout?: stream.Writable
 }
+
+export interface Forkable<T> {
+  // Forks this state.
+  fork (): T
+}
+
+export interface LogicalNormalForm {
+  or: BinaryOperation
+  and: BinaryOperation
+  not: BinaryOperation
+}
+
+

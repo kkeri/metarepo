@@ -10,14 +10,14 @@ XP02 {
 		| CommaList #comma Expression -- default
 		| Expression
 
-	Expression = Join
+	Expression = Disjunction
 	
-	Join =
-		| Join "\\/" Meet -- default
-		| Meet
+	Disjunction =
+		| Disjunction "\\/" Conjunction -- default
+		| Conjunction
 
-	Meet =
-		| Meet "/\\" Choice -- default
+	Conjunction =
+		| Conjunction "/\\" Choice -- default
 		| Choice
 
 	Choice =

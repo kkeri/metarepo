@@ -1,17 +1,21 @@
 import { BinaryDispatcher } from './dispatcher'
-import { Model, BinaryOperation } from './types'
+import { Model, BinaryOperation, Rank, Forkable, Combinator } from './types'
 import * as model from './model'
+import { createShortcutCombinator } from './combinator'
 
-export function createMeet (
-  disp: BinaryDispatcher<BinaryOperation> = meetDispatcher
-): BinaryOperation {
-  return function meet (a: Model, b: Model): Model {
-    if (a.rank != null && b.rank != null) {
-      if (a.rank < b.rank) return a
-      if (a.rank > b.rank) return b
-    }
-    return disp.get(a, b)(a, b)
-  }
+export function createMeet<Context extends Forkable<Context>> (
+  disp: BinaryDispatcher<BinaryOperation> = meetDispatcher,
+): Combinator<Context> {
+  return createShortcutCombinator(
+    (a, b) => {
+      if (a.rank != null && b.rank != null) {
+        if (a.rank < b.rank) return a
+        if (a.rank > b.rank) return b
+      }
+      return meetDispatcher.get(a, b)(a, b)
+    },
+    a => a.rank !== null && a.rank <= Rank.Failure,
+  )
 }
 
 export const meetDispatcher = new BinaryDispatcher<(a: Model, b: Model) => Model>()
