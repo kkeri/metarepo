@@ -1,6 +1,7 @@
 
-xp02 xp02-all: xp02-parser bindir libdir
+xp02 xp02-all: xp02-parser libdir bindir
 	$(TSC) -p src/xp02
+	cp src/starter bin/xp02
 
 xp02-watch:
 	$(TSC) -w -p src/xp02

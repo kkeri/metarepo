@@ -134,8 +134,21 @@ export class BracketBlock implements Model {
     public contents: Model
   ) { }
 
-  equals (other: BracketBlock, equal: BinaryPredicate) {
+  equals (other: BracketBlock, equal: BinaryPredicate<Model>) {
     return equal(this.contents, other.contents)
+  }
+}
+
+export class BracketList implements Model {
+  constructor (
+    public a: Model,
+    public b: Model,
+    public rank: Rank | null = null
+  ) { }
+
+  equals (other: BracketList, equal: BinaryPredicate<Model>) {
+    return equal(this.a, other.a)
+      && equal(this.b, other.b)
   }
 }
 
@@ -146,8 +159,46 @@ export class BraceBlock implements Model {
     public contents: Model
   ) { }
 
-  equals (other: BraceBlock, equal: BinaryPredicate) {
+  equals (other: BraceBlock, equal: BinaryPredicate<Model>) {
     return equal(this.contents, other.contents)
+  }
+}
+
+export class BraceList implements Model {
+  constructor (
+    public a: Model,
+    public b: Model,
+    public rank: Rank | null = null
+  ) { }
+
+  equals (other: BraceList, equal: BinaryPredicate<Model>) {
+    return equal(this.a, other.a)
+      && equal(this.b, other.b)
+  }
+}
+
+export class ParenBlock implements Model {
+  rank = null
+
+  constructor (
+    public contents: Model
+  ) { }
+
+  equals (other: ParenBlock, equal: BinaryPredicate<Model>) {
+    return equal(this.contents, other.contents)
+  }
+}
+
+export class ParenList implements Model {
+  constructor (
+    public a: Model,
+    public b: Model,
+    public rank: Rank | null = null
+  ) { }
+
+  equals (other: ParenList, equal: BinaryPredicate<Model>) {
+    return equal(this.a, other.a)
+      && equal(this.b, other.b)
   }
 }
 
@@ -159,7 +210,7 @@ export class Binding implements Model {
     public value: Model
   ) { }
 
-  equals (other: Binding, equal: BinaryPredicate) {
+  equals (other: Binding, equal: BinaryPredicate<Model>) {
     return equal(this.key, other.key) && equal(this.value, other.value)
   }
 }
@@ -175,7 +226,7 @@ export class NameConstant implements Model {
     public rank: Rank | null = null
   ) { }
 
-  equals (other: NameConstant, equal: BinaryPredicate) {
+  equals (other: NameConstant, equal: BinaryPredicate<Model>) {
     return this.name === other.name
   }
 }
@@ -188,7 +239,7 @@ export class MemberRef implements Model {
     public name: Model,
   ) { }
 
-  equals (other: MemberRef, equal: BinaryPredicate) {
+  equals (other: MemberRef, equal: BinaryPredicate<Model>) {
     return equal(this.base, other.base) && equal(this.name, other.name)
   }
 }
@@ -202,7 +253,7 @@ export class Optional implements Model {
     public a: Model
   ) { }
 
-  equals (other: Optional, equal: BinaryPredicate) {
+  equals (other: Optional, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
   }
 }
@@ -214,7 +265,7 @@ export class Missing implements Model {
     public a: Model
   ) { }
 
-  equals (other: Missing, equal: BinaryPredicate) {
+  equals (other: Missing, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
   }
 }
@@ -228,7 +279,7 @@ export class Success implements Model {
     public message
   ) { }
 
-  equals (other: Success, equal: BinaryPredicate) {
+  equals (other: Success, equal: BinaryPredicate<Model>) {
     return equal(this.model, other.model)
       && equal(this.code, other.code)
       && equal(this.message, other.message)
@@ -244,7 +295,7 @@ export class Failure implements Model {
     public message
   ) { }
 
-  equals (other: Failure, equal: BinaryPredicate) {
+  equals (other: Failure, equal: BinaryPredicate<Model>) {
     return equal(this.model, other.model)
       && equal(this.code, other.code)
       && equal(this.message, other.message)
@@ -260,9 +311,18 @@ export class Or implements Model {
     public rank: Rank | null = null
   ) { }
 
-  equals (other: Or, equal: BinaryPredicate) {
+  equals (other: Or, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* Or.tree(this.a)
+    yield* Or.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof Or) yield* model; else yield model
   }
 }
 
@@ -273,9 +333,18 @@ export class And implements Model {
     public rank: Rank | null = null
   ) { }
 
-  equals (other: And, equal: BinaryPredicate) {
+  equals (other: And, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* And.tree(this.a)
+    yield* And.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof And) yield* model; else yield model
   }
 }
 
@@ -285,7 +354,7 @@ export class Not implements Model {
     public rank: Rank | null = null
   ) { }
 
-  equals (other: Not, equal: BinaryPredicate) {
+  equals (other: Not, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
   }
 }
@@ -298,7 +367,7 @@ export class Abstraction implements Model {
     public b: Model,
   ) { }
 
-  equals (other: Abstraction, equal: BinaryPredicate) {
+  equals (other: Abstraction, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
   }
@@ -312,7 +381,21 @@ export class Application implements Model {
     public b: Model,
   ) { }
 
-  equals (other: Application, equal: BinaryPredicate) {
+  equals (other: Application, equal: BinaryPredicate<Model>) {
+    return equal(this.a, other.a)
+      && equal(this.b, other.b)
+  }
+}
+
+export class Sequence implements Model {
+  rank = Rank.Middle
+
+  constructor (
+    public a: Model,
+    public b: Model,
+  ) { }
+
+  equals (other: Application, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
   }

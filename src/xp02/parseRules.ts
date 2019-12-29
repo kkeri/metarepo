@@ -1,6 +1,6 @@
 import * as allModels from './model'
 import { UnaryDispatcher } from './dispatcher'
-import { matchString, matchRegexp, ParserRule, parse, skipSpace } from './parse'
+import { matchString, matchRegexp, ParserRule, parse, skipSpace } from './operation/parse'
 import { Rank } from './types'
 import { } from './join'
 import { } from './meet'
@@ -58,7 +58,7 @@ export const parseRules = new UnaryDispatcher<ParserRule>().addClasses(allModels
     if (b.rank != null && b.rank > Rank.Failure) return b
     ctx.pos = pos
 
-    return ctx.join(a, b)
+    return new Or(a, b)
   },
 
   And: (ctx, syntax: And) => {
@@ -70,6 +70,6 @@ export const parseRules = new UnaryDispatcher<ParserRule>().addClasses(allModels
     const b = parse(ctx, syntax.b)
     if (b.rank != null && b.rank <= Rank.Failure) return b
 
-    return ctx.meet(a, b)
+    return new And(a, b)
   },
 })

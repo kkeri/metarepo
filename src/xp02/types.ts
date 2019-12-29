@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events'
 import stream = require('stream')
+import { ModelPrinter } from '../util/printer'
 
 export interface Model {
   rank: Rank | null
-  // Simple structural equality.
-  equals (other: Model, equal: BinaryPredicate): boolean
 }
 
 export interface NormalModel extends Model {
@@ -19,16 +18,39 @@ export enum Rank {
   Failure = -2,
 }
 
-export type UnaryOperation = (a: Model) => Model
-export type BinaryOperation = (a: Model, b: Model) => Model
+export type UnaryOperation<T> = (a: T) => T
+export type BinaryOperation<T> = (a: T, b: T) => T
 
-export type UnaryPredicate = (a: Model) => boolean
-export type BinaryPredicate = (a: Model, b: Model) => boolean
+export type UnaryPredicate<T> = (a: T) => boolean
+export type BinaryPredicate<T> = (a: T, b: T) => boolean
 
-export interface Context {
-  join: BinaryOperation
-  meet: BinaryOperation
+export type Combinator<Context> = BinaryOperation<(ctx: Context) => Model>
+
+export interface Forkable<T> {
+  fork (): T
+}
+
+export interface EqualContext {
+  equal: (a: Model, b: Model, ctx: EqualContext) => boolean
+}
+
+export interface OperationContext {
+
+  // operations
+
+  normalize (a: Model, ctx: OperationContext): Model
+  apply (a: Model, b: Model, ctx: OperationContext): Model | null
+  lookup (key: Model, env: Model, ctx: OperationContext): Model | null
+
+  // predicates
+
+  equal: (a: Model, b: Model, ctx: EqualContext) => boolean
+
+  // state
+
+  scope: Model
   useState: UseStateFunction
+  printer?: ModelPrinter
 }
 
 export type UseStateFunction = (keys: any[]) => any
@@ -44,4 +66,10 @@ export interface reduceOptions {
   // Standard streams.
   stdin?: stream.Writable
   stdout?: stream.Writable
+}
+
+export interface LogicalNormalizer<T> {
+  join: BinaryOperation<T>
+  meet: BinaryOperation<T>
+  complement: UnaryOperation<T>
 }

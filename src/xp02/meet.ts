@@ -3,14 +3,14 @@ import { Model, BinaryOperation } from './types'
 import * as model from './model'
 
 export function createMeet (
-  disp: BinaryDispatcher<BinaryOperation> = meetDispatcher
-): BinaryOperation {
+  disp: BinaryDispatcher<BinaryOperation<Model>> = meetDispatcher
+): BinaryOperation<Model> {
   return function meet (a: Model, b: Model): Model {
     if (a.rank != null && b.rank != null) {
       if (a.rank < b.rank) return a
       if (a.rank > b.rank) return b
     }
-    return disp.get(a, b)(a, b)
+    return disp.get(a, b)?.(a, b) ?? new model.Bottom()
   }
 }
 

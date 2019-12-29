@@ -1,13 +1,16 @@
+import * as model from '../model'
 import { test } from 'tap'
 import { Model } from '../types'
 import { Diagnostics } from '../../util/diag'
 import { ohmParser } from '../ohmParser'
-import { ParseContext, parse } from '../parse'
+import { ParseContext, parse } from '../operation/parse'
 import { createStateStorage } from '../useState'
 import { parseRules } from '../parseRules'
-import * as model from '../model'
-import { createJoin } from '../join'
-import { createMeet } from '../meet'
+import { normalize } from '../operation/normalize'
+import { apply } from '../operation/apply'
+import { equal } from '../operation/equal'
+import { lookup } from '../operation/lookup'
+import { createNativeDefs } from '../native'
 
 function ohmParse (str: string): Model {
   const diag = new Diagnostics()
@@ -17,11 +20,14 @@ function ohmParse (str: string): Model {
 
 function xpParse (model: Model, source: string): Model {
   const parseCtx: ParseContext = {
+    normalize,
+    apply,
+    equal,
+    lookup,
+    scope: createNativeDefs(),
     sourceName: 'source',
     source,
     pos: 0,
-    join: createJoin(),
-    meet: createMeet(),
     useState: createStateStorage(),
     rules: parseRules,
   }

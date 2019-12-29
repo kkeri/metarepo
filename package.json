@@ -16,7 +16,7 @@
     "@types/node": "^11.11.3",
     "concurrently": "^3.5.0",
     "tap": "^14.9.2",
-    "typescript": "^3.7.2",
+    "typescript": "^3.7.4",
     "watch-run": "^1.2.5"
   }
 }

@@ -3,14 +3,14 @@ import * as assert from 'assert'
 export class UnaryDispatcher<T> {
   map = new Map<object, T>()
 
-  get (o: object): T {
+  get (o: object): T | null {
     o = Object.getPrototypeOf(o)
     while (o) {
       const t = this.map.get(o)
       if (t) return t
       o = Object.getPrototypeOf(o)
     }
-    throw new Error('Cannot dispatch object')
+    return null
   }
 
   // add (actions) {
@@ -44,14 +44,14 @@ export class UnaryDispatcher<T> {
 export class BinaryDispatcher<T> {
   map = new Map<object, Map<object, T>>()
 
-  get (l: object, r: object): T {
+  get (l: object, r: object): T | null {
     l = Object.getPrototypeOf(l)
     while (l) {
       const t = this.map.get(l)
       if (t) return getRight(r, t)
       l = Object.getPrototypeOf(l)
     }
-    throw new Error('Cannot dispatch object')
+    return null
   }
 
   addClasses (ctors, values: { [index: string]: T }) {
