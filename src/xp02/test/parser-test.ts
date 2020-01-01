@@ -79,8 +79,8 @@ test('RegExpConstant', t => {
   t.end()
 })
 
-test('Or', t => {
-  const s1 = new model.Or(new model.NumberType(), new model.BooleanType())
+test('Sum', t => {
+  const s1 = new model.Sum(new model.NumberType(), new model.BooleanType())
   t.same(xpParse(s1, ''),
     new model.Missing(s1)
   )
@@ -102,8 +102,8 @@ test('Or', t => {
   t.end()
 })
 
-test('And', t => {
-  const s1 = new model.And(new model.NumberType(), new model.BooleanType())
+test('Product', t => {
+  const s1 = new model.Product(new model.NumberType(), new model.BooleanType())
   t.same(xpParse(s1, ''),
     new model.Missing(s1.a)
   )
@@ -117,13 +117,13 @@ test('And', t => {
     new model.Missing(s1.b)
   )
   t.same(xpParse(s1, '1 true'),
-    new model.And(new model.NumberConstant(1), new model.BooleanConstant(true), 0)
+    new model.Product(new model.NumberConstant(1), new model.BooleanConstant(true), 0)
   )
   t.same(xpParse(s1, '1true'),
-    new model.And(new model.NumberConstant(1), new model.BooleanConstant(true), 0)
+    new model.Product(new model.NumberConstant(1), new model.BooleanConstant(true), 0)
   )
   t.same(xpParse(s1, '2 false 1 true'),
-    new model.And(new model.NumberConstant(2), new model.BooleanConstant(false), 0)
+    new model.Product(new model.NumberConstant(2), new model.BooleanConstant(false), 0)
   )
   t.end()
 })

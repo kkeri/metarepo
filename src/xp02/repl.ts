@@ -14,7 +14,7 @@ import { equal } from './operation/equal'
 import { createNativeDefs } from './native'
 import { createStateStorage } from './useState'
 import { OperationContext } from './types'
-import { And } from './model'
+import { Product } from './model'
 
 export const styles = {
   operator: colors.cyan,
@@ -147,7 +147,7 @@ function parseExpression (str: string, state: ReplState) {
 }
 
 function listPremises (state: ReplState) {
-  if (state.ctx.scope instanceof And) {
+  if (state.ctx.scope instanceof Product) {
     for (const elem of state.ctx.scope) printModel(elem, state).br()
   }
   else {

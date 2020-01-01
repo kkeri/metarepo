@@ -57,7 +57,7 @@ export const disp = new UnaryDispatcher<(ctx: OperationContext) => Model>().addC
     }
   },
   Binding (ctx) {
-    ctx.scope = new model.And(ctx.scope, this)
+    ctx.scope = new model.Product(ctx.scope, this)
     return new model.Top()
   },
 })

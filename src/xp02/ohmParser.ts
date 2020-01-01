@@ -11,10 +11,10 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
   // expression
 
   Join_default (left, op, right) {
-    return new model.Or(left.model(), right.model())
+    return new model.Sum(left.model(), right.model())
   },
   Meet_default (left, op, right) {
-    return new model.And(left.model(), right.model())
+    return new model.Product(left.model(), right.model())
   },
   BracketBlock (_lb_, body, _comma_, _rb_) {
     return new model.BracketBlock(body.model()[0] || new model.Bottom())

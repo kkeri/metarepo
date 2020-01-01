@@ -16,10 +16,10 @@ export function createJoin (
 
 export const joinDispatcher = new BinaryDispatcher<BinaryOperation<Model>>()
   .addClass(Object, (a, b) => {
-    return new model.Or(a, b, a.rank)
+    return new model.Sum(a, b, a.rank)
   })
   .addClasses(model, {
     Missing: (a: model.Missing, b: model.Missing) => {
-      return new model.Missing(new model.Or(a.a, b.a, a.a.rank))
+      return new model.Missing(new model.Sum(a.a, b.a, a.a.rank))
     },
   })

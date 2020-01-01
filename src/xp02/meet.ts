@@ -16,11 +16,11 @@ export function createMeet (
 
 export const meetDispatcher = new BinaryDispatcher<(a: Model, b: Model) => Model>()
   .addClass(Object, (a, b) => {
-    return new model.And(a, b, a.rank)
+    return new model.Product(a, b, a.rank)
   })
   .addClasses(model, {
 
     Missing: (a: model.Missing, b: model.Missing) => {
-      return new model.Missing(new model.And(a.a, b.a, a.a.rank))
+      return new model.Missing(new model.Product(a.a, b.a, a.a.rank))
     },
   })

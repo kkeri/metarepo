@@ -16,7 +16,7 @@ export function createNativeDefs (): Model {
       new model.NameConstant(name),
       nativeDefs[name]
     )
-    defs = new model.And(defs, def)
+    defs = new model.Product(defs, def)
   }
   return defs
 }

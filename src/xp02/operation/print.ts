@@ -63,11 +63,11 @@ export const printActions = new ActionMap().addClasses(model, {
 
   // operations
 
-  Or (printer, prec) {
+  Sum (printer, prec) {
     printer.operation(operator.join, prec, this.a, this.b)
   },
 
-  And (printer, prec) {
+  Product (printer, prec) {
     printer.operation(operator.meet, prec, this.a, this.b)
   },
 

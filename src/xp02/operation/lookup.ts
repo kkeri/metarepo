@@ -8,7 +8,7 @@ export function lookup (env: Model, key: Model, ctx: OperationContext): Model | 
 
 export const disp = new UnaryDispatcher<(key: Model, ctx: OperationContext) => Model | null>()
   .addClasses(allModels, {
-    And (key, ctx) {
+    Product (key, ctx) {
       return ctx.lookup(this.b, key, ctx) || ctx.lookup(this.a, key, ctx)
     },
     Binding (key, ctx) {

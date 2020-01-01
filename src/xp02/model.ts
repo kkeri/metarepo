@@ -304,47 +304,47 @@ export class Failure implements Model {
 
 // Combinators
 
-export class Or implements Model {
+export class Sum implements Model {
   constructor (
     public a: Model,
     public b: Model,
     public rank: Rank | null = null
   ) { }
 
-  equals (other: Or, equal: BinaryPredicate<Model>) {
+  equals (other: Sum, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
   }
 
   *[Symbol.iterator] (): IterableIterator<Model> {
-    yield* Or.tree(this.a)
-    yield* Or.tree(this.b)
+    yield* Sum.tree(this.a)
+    yield* Sum.tree(this.b)
   }
 
   static *tree (model): IterableIterator<Model> {
-    if (model instanceof Or) yield* model; else yield model
+    if (model instanceof Sum) yield* model; else yield model
   }
 }
 
-export class And implements Model {
+export class Product implements Model {
   constructor (
     public a: Model,
     public b: Model,
     public rank: Rank | null = null
   ) { }
 
-  equals (other: And, equal: BinaryPredicate<Model>) {
+  equals (other: Product, equal: BinaryPredicate<Model>) {
     return equal(this.a, other.a)
       && equal(this.b, other.b)
   }
 
   *[Symbol.iterator] (): IterableIterator<Model> {
-    yield* And.tree(this.a)
-    yield* And.tree(this.b)
+    yield* Product.tree(this.a)
+    yield* Product.tree(this.b)
   }
 
   static *tree (model): IterableIterator<Model> {
-    if (model instanceof And) yield* model; else yield model
+    if (model instanceof Product) yield* model; else yield model
   }
 }
 

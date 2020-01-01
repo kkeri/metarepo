@@ -4,7 +4,7 @@ import { matchString, matchRegexp, ParserRule, parse, skipSpace } from './operat
 import { Rank } from './types'
 import { } from './join'
 import { } from './meet'
-import { Or, And, NullConstant, Missing, BooleanConstant, NumberConstant, NameConstant, RegExpConstant, StringConstant, Optional, StringType, NumberType, NameType, NullType } from './model'
+import { Sum, Product, NullConstant, Missing, BooleanConstant, NumberConstant, NameConstant, RegExpConstant, StringConstant, Optional, StringType, NumberType, NameType, NullType } from './model'
 
 const numberRegExp = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/y
 const booleanRegExp = /true|false/y
@@ -47,7 +47,7 @@ export const parseRules = new UnaryDispatcher<ParserRule>().addClasses(allModels
       : new Missing(syntax)
   },
 
-  Or: (ctx, syntax: Or) => {
+  Sum: (ctx, syntax: Sum) => {
     const pos = ctx.pos
 
     const a = parse(ctx, syntax.a)
@@ -58,10 +58,10 @@ export const parseRules = new UnaryDispatcher<ParserRule>().addClasses(allModels
     if (b.rank != null && b.rank > Rank.Failure) return b
     ctx.pos = pos
 
-    return new Or(a, b)
+    return new Sum(a, b)
   },
 
-  And: (ctx, syntax: And) => {
+  Product: (ctx, syntax: Product) => {
     skipSpace(ctx)
     const a = parse(ctx, syntax.a)
     if (a.rank != null && a.rank <= Rank.Failure) return a
@@ -70,6 +70,6 @@ export const parseRules = new UnaryDispatcher<ParserRule>().addClasses(allModels
     const b = parse(ctx, syntax.b)
     if (b.rank != null && b.rank <= Rank.Failure) return b
 
-    return new And(a, b)
+    return new Product(a, b)
   },
 })
