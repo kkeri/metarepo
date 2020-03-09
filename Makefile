@@ -1,6 +1,7 @@
 
 project_paths += src/xp01
 project_paths += src/xp02
+project_paths += src/xp03
 
 #=============================================================================
 

@@ -47,11 +47,8 @@ export class ModelPrinter {
     } else if (node === null) {
       this.keyword('null')
     } else if (Array.isArray(node)) {
-      for (let i of node) this.print(i)
+      for (let i of node) this.print(i, prec)
     } else if (typeof node === 'object') {
-      if (typeof node.reflect === 'function') {
-        node = node.reflect()
-      }
       if (this.busySet.has(node)) {
         this.keyword('@circular')
         return this
@@ -112,6 +109,26 @@ export class ModelPrinter {
       case 'post':
         this.print(a, op).operator(op)
         break
+    }
+    if (op.precedence < prec) this.delimiter(')')
+    return this
+  }
+
+  // Prints a binary operation.
+  //    parent - the parent operator or precedence of the parent operator
+  infixList (op, parent: Operator | number | undefined, items: any[]): this {
+    let prec = (typeof parent === 'object') ? parent.precedence : parent || 0
+    if (op.parens && parent !== op) prec++
+    if (op.precedence < prec) this.delimiter('(')
+    let first = true
+    for (const item of items) {
+      if (first) {
+        first = false
+      }
+      else {
+        this.operator(op)
+      }
+      this.print(item, op)
     }
     if (op.precedence < prec) this.delimiter(')')
     return this

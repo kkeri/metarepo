@@ -1,0 +1,15 @@
+xp03 xp03-all: xp03-parser libdir bindir
+	tsc -p src/xp03
+	cp src/starter bin/xp03
+
+xp03-watch:
+	tsc -w -p src/xp03
+
+xp03-parser: lib/xp03/xp03-recipe.js
+
+lib/xp03/xp03-recipe.js: src/xp03/xp03.ohm
+	mkdir -p lib/xp03
+	script/build-ohm.js $< $@
+
+xp03-test:
+	$(TAP) lib/xp03/test/*.js

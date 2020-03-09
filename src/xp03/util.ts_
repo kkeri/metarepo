@@ -1,0 +1,89 @@
+import { Model, Forkable, Shrinkable, Growable, Rank } from './types'
+import { Empty, Bottom } from './model'
+
+export function shrinkableArray (a: Model[], index: number = 0)
+  : Shrinkable & Forkable<Shrinkable> {
+  return {
+    peek () {
+      if (this.index < a.length) {
+        return a[this.index]
+      }
+      else {
+        return new Empty()
+      }
+    },
+    get () {
+      if (this.index < a.length) {
+        return a[this.index++]
+      }
+      else {
+        return new Empty()
+      }
+    },
+    fork () {
+      return shrinkableArray(a, index)
+    }
+  }
+}
+
+interface RawContext {
+  left: RawContext | null
+  right: Model
+  length: number
+  array?: Model[]
+}
+
+export function growableContext (c: RawContext | null = null)
+  : Growable & Forkable<Shrinkable> {
+  return {
+    put (m) {
+      c = { left: c, right: m, length: c ? c.length + 1 : 1 }
+    },
+    findFirst (f) {
+      if (c == null) return new Bottom()
+      if (!c.array) {
+        let a = new Array<Model>(c.length)
+        let d: RawContext | null = c
+        let i = c.length
+        while (d) {
+          a[--i] = d.right
+          d = d.left
+        }
+        c.array = a
+      }
+      for (let i = 0; i < c.length; i++) {
+        const r = f(c.array[i])
+        if (r.rank != null && r.rank > Rank.Bottom) return r
+      }
+      return new Bottom()
+    },
+    findLast (f) {
+      let d = c
+      while (d) {
+        const r = f(d.right)
+        if (r.rank != null && r.rank > Rank.Bottom) return r
+        d = d.left
+      }
+      return new Bottom()
+    },
+    fork () {
+      return growableContext(c)
+    }
+  }
+}
+
+export function createReduceContext (
+  ctx: Growable & Forkable,
+  src: Shrinkable & Forkable,
+) {
+  return {
+    ctx,
+    src,
+    fork () {
+      return createReduceContext(
+        this.ctx.fork(),
+        this.src.fork(),
+      )
+    }
+  }
+}

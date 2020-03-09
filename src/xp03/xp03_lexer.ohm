@@ -1,0 +1,33 @@
+XP04 {
+
+	Module = Token*
+
+	Token =
+		| true
+		| false
+		| identifier
+		| #semicolon
+
+	// lexer
+
+	true = "true" ~ identifierPart
+	false = "false" ~ identifierPart
+
+	space := "\t" | " " | "\n" | "\r" | comment
+	spaceInline = "\t" | " " | commentInline
+
+	comment = blockComment | lineEndComment
+	commentInline = blockCommentInline | lineEndComment
+
+	blockComment = "/*" (~"*/" any)* "*/"
+	blockCommentInline = "/*" (~("*/" | "\n" | "\r") any)* "*/"
+	lineEndComment = "//" (~("\n" | "\r") any)*
+
+	semicolon =
+		| space* (";" | end)
+		| spaceInline* ("\r" | "\n" | end)
+
+	identifier = identifierStart identifierPart*
+	identifierStart = "A".."Z" | "a".."z" | "_" | "$"
+	identifierPart = identifierStart | digit
+}
