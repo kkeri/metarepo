@@ -1,11 +1,12 @@
-import { Model, Rank, Context, Forkable } from './types'
-import { UnaryDispatcher } from './dispatcher'
+import { Model, Rank, Forkable } from '../types'
+import { UnaryDispatcher } from '../dispatcher'
+import { Failure } from '../model'
 
 export type ParserRule = (ctx: ParseContext, syntax: Model) => Model
 
 export type RestorePoint = number
 
-export interface ParseContext extends Context, Forkable<ParseContext> {
+export interface ParseContext extends Forkable<ParseContext> {
   // The source text.
   source: string
   // Name of source for diagnostics.
@@ -20,9 +21,10 @@ export interface ParseContext extends Context, Forkable<ParseContext> {
 
 // parses a syntax model at the current position.
 export function parse (ctx: ParseContext, syntax: Model): Model {
-  return ctx.rules.get(syntax)(ctx, syntax)
+  // todo: use the current scope for name resolution
+  return ctx.rules.get(syntax)?.(ctx, syntax) ??
+    new Failure(syntax, 'RULE_NOT_FOUND', 'parse rule not found')
 }
-
 
 export function matchString (ctx: ParseContext, value: string) {
   if (ctx.source.substr(ctx.pos, value.length) === value) {

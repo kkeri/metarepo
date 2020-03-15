@@ -1,13 +1,17 @@
 XP02 {
 
-	Module = SemicolonList #semicolon?
+	Module = (BraceList #semicolon?)?
 	
-	SemicolonList =
-		| SemicolonList #semicolon Expression -- default
+	BraceList =
+		| BraceList #semicolon Expression -- default
 		| Expression
-	
-	CommaList =
-		| CommaList #comma Expression -- default
+
+	BracketList =
+		| BracketList #comma Expression -- default
+		| Expression
+
+	ParenList =
+		| ParenList #comma Expression -- default
 		| Expression
 
 	Expression = Disjunction
@@ -28,7 +32,7 @@ XP02 {
 		| Sequence #spaceInline Primary -- default
 		| Primary
 
-	Primary = 
+	Primary =
 		| BraceBlock
 		| BracketBlock
 		| ParenBlock
@@ -43,11 +47,11 @@ XP02 {
 		| true
 		| false
 
-	BraceBlock = "{" SemicolonList #semicolon? "}"
+	BraceBlock = "{" (BraceList #semicolon?)? "}"
 
-	BracketBlock = "[" CommaList #comma? "]"
+	BracketBlock = "[" (BracketList #comma?)? "]"
 
-	ParenBlock = "(" CommaList #comma? ")"
+	ParenBlock = "(" (ParenList #comma?)? ")"
 
 	MemberRef = Primary "." Name
 

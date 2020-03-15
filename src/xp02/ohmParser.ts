@@ -11,25 +11,37 @@ export const ohmParser = new OhmParser(join(__dirname, './xp02-recipe.js'), {
   // expression
 
   SemicolonList_default (left, op, right) {
-    return new model.And(left.model(), right.model())
+    return new model.Product(left.model(), right.model())
   },
   CommaList_default (left, op, right) {
-    return new model.Or(left.model(), right.model())
+    return new model.Sum(left.model(), right.model())
   },
   Disjunction_default (left, op, right) {
-    return new model.Or(left.model(), right.model())
+    return new model.Sum(left.model(), right.model())
   },
   Conjunction_default (left, op, right) {
-    return new model.And(left.model(), right.model())
+    return new model.Product(left.model(), right.model())
   },
   BracketBlock (_lb_, body, _comma_, _rb_) {
-    return new model.BracketBlock(body.model())
+    return new model.BracketBlock(body.model()[0] || new model.Bottom())
+  },
+  BracketList_default (left, op, right) {
+    return new model.BracketList(left.model(), right.model())
   },
   BraceBlock (_lb_, body, _sc_, _rb_) {
-    return new model.BraceBlock(body.model())
+    return new model.BraceBlock(body.model()[0] || new model.Top())
+  },
+  BraceList_default (left, op, right) {
+    return new model.BraceList(left.model(), right.model())
   },
   ParenBlock (_lb_, body, _comma_, _rb_) {
-    return body.model()
+    return new model.ParenBlock(body.model()[0])
+  },
+  ParenList_default (left, op, right) {
+    return new model.ParenList(left.model(), right.model())
+  },
+  Sequence_default (left, _space_, right) {
+    return new model.Sequence(left.model(), right.model())
   },
   MemberRef (left, op, right) {
     return new model.MemberRef(left.model(), right.model())

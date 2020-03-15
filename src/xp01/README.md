@@ -8,11 +8,8 @@ Run tests to get ideas what is broken (hint: proofs involving implication).
 
 ## Usage
 
-First, go to the main directory of the repository.
-
-Build the project:
-
-    make xp01
+Go to the main directory of the repository.
+For build instructions see the [main readme file](../../README.md).
 
 Run tests:
 
@@ -245,7 +242,7 @@ succeeds, but a few fails. For example:
 ~a \/ c
 > a
 false
-> .p c
+> .prove c
 failed to prove: c
 required       : c
 ~~~
@@ -257,7 +254,7 @@ where the expected behavior would be
 ~a \/ c
 > a
 a
-> .p c
+> .prove c
 success
 ~~~
 

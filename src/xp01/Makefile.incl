@@ -1,9 +1,9 @@
 xp01 xp01-all: xp01-parser libdir bindir
-	tsc -p src/xp01
+	$(TSC) -p src/xp01
 	cp src/starter bin/xp01
 
 xp01-watch:
-	tsc -w -p src/xp01
+	$(TSC) -w -p src/xp01
 
 xp01-parser: lib/xp01/xp01-recipe.js
 

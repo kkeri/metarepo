@@ -4,7 +4,7 @@ import * as model from './model'
 import { createShortcutCombinator } from './combinator'
 
 export function createMeet<Context extends Forkable<Context>> (
-  disp: BinaryDispatcher<BinaryOperation> = meetDispatcher,
+  disp: BinaryDispatcher<BinaryOperation<Model>> = meetDispatcher,
 ): Combinator<Context> {
   return createShortcutCombinator(
     (a, b) => {
@@ -12,7 +12,7 @@ export function createMeet<Context extends Forkable<Context>> (
         if (a.rank < b.rank) return a
         if (a.rank > b.rank) return b
       }
-      return meetDispatcher.get(a, b)(a, b)
+      return disp.get(a, b)?.(a, b) ?? new model.Bottom()
     },
     a => a.rank !== null && a.rank <= Rank.Failure,
   )
@@ -20,11 +20,11 @@ export function createMeet<Context extends Forkable<Context>> (
 
 export const meetDispatcher = new BinaryDispatcher<(a: Model, b: Model) => Model>()
   .addClass(Object, (a, b) => {
-    return new model.And(a, b, a.rank)
+    return new model.Product(a, b, a.rank)
   })
   .addClasses(model, {
 
     Missing: (a: model.Missing, b: model.Missing) => {
-      return new model.Missing(new model.And(a.a, b.a, a.a.rank))
+      return new model.Missing(new model.Product(a.a, b.a, a.a.rank))
     },
   })

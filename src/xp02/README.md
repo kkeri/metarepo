@@ -1,7 +1,7 @@
 # Experiment 02
 
-A programming language based on a program model.
+A programming language based on a skeleton syntax and generic program model.
 
 ## Goals
 
-- discover the relation of parsing and algebraic types
+Study a pair of operators as generic program structure.
