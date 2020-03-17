@@ -3,12 +3,13 @@ import * as colors from 'colors'
 import { Diagnostics } from '../util/diag'
 import { PrettyFormatter } from '../util/format'
 import { ModelPrinter } from '../util/printer'
-import { ModelBase, top } from './model'
+import { ModelClass, top, LowerMeet } from './model'
 import { parser } from './parser'
 import { printActions } from './print'
 import { CommandProcessorFn } from '../util/iface'
-import { Rank, ReduceContext } from './types'
-import { ReduceContextClass } from './ctx'
+import { Rank, Model, NormalModel } from './types'
+import { reduce } from './reduce'
+import { lowerMeet } from './meet'
 
 export const styles = {
   operator: colors.cyan,
@@ -32,11 +33,11 @@ export function createCommandProcessor (
   output: stream.Writable,
 ): CommandProcessorFn {
   const formatter: PrettyFormatter = new PrettyFormatter(output, 0, formatOptions)
-  let ctx: ReduceContext = new ReduceContextClass()
+  let ctx: NormalModel = top
   let assertions: number = 0
   let failures: number = 0
 
-  output.write(`XP04 - Type .h for help.\n`)
+  output.write(`XP03 - Type .h for help.\n`)
 
   return function processLine (line) {
     line = line.trim()
@@ -71,7 +72,7 @@ export function createCommandProcessor (
 
       case 'c':
       case 'case':
-        ctx.reset()
+        ctx = top
         break
 
       case 'p':
@@ -106,7 +107,7 @@ export function createCommandProcessor (
 
       case 'r':
       case 'reset':
-        ctx.reset()
+        ctx = top
         formatter.emit('----------------').br()
         break
 
@@ -124,9 +125,9 @@ export function createCommandProcessor (
     const stmt = parseStatement(str)
     if (stmt) {
       try {
-        let result = stmt.reduce(ctx)
+        let result = reduce(stmt, ctx)
         printModel(result).br()
-        if (result.rank > Rank.Bottom) ctx.extend(result)
+        if (result.rank > Rank.Bottom) ctx = lowerMeet(ctx, result)
       }
       catch (e) {
         formatter.emit(e.toString()).br()
@@ -137,7 +138,7 @@ export function createCommandProcessor (
   // assertions
 
 
-  function prove (a: ModelBase) {
+  function prove (a: ModelClass) {
     try {
       assertions++
       const result = a // deduce(premises, a)
@@ -158,7 +159,7 @@ export function createCommandProcessor (
     }
   }
 
-  function assertEquality (a: ModelBase, b: ModelBase) {
+  function assertEquality (a: ModelClass, b: ModelClass) {
     // try {
     //   a = deduce(premises, a)
     //   b = deduce(premises, b)
@@ -196,10 +197,16 @@ export function createCommandProcessor (
   }
 
   function printContext () {
-    ctx.forEachPremise(premise => {
-      printModel(premise)
+    if (ctx instanceof LowerMeet) {
+      for (const elem of ctx) {
+        printModel(elem)
+        formatter.br()
+      }
+    }
+    else {
+      printModel(ctx)
       formatter.br()
-    })
+    }
     return formatter
   }
 

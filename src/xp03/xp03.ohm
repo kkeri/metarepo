@@ -1,18 +1,20 @@
-XP04 {
+XP03 {
 
 	Module = ListOf<Term, #semicolon> #semicolon?
 
-	Term = Fn // Typing
+	Term = Typing
 
-	// Typing =
-	// 	| Term ":" Fn -- default
-	// 	| Fn	
+	Typing =
+		| Term ":" Fn -- default
+		| Fn	
 	
 	Fn =
-		| NonemptyListOf<Seq, "->"> -- default
+		| Seq "->" Fn -- default
+		| Seq
 
 	Seq =
-		| NonemptyListOf<Primary, #space?> -- default
+		| Primary #spaceInline Seq -- default
+		| Primary
 
 	Primary =
 		| Parens
@@ -26,9 +28,9 @@ XP04 {
 		| true
 		| false
 
-	Symbol = identifier
+	Symbol = symbol
 
-	SymbolType = symbol
+	SymbolType = symbolType
 
 	// lexer
 
@@ -57,6 +59,18 @@ XP04 {
 	identifierStart = "A".."Z" | "a".."z" | "_" | "$"
 	identifierPart = identifierStart | digit
 	
-	symbol = "`" symbolCharacter* "`"
-	symbolCharacter = ~("`" | "\\" | "\u0000".."\u001f") any
+	symbol = symbolCharacter+
+	symbolType = "`" symbolCharacter+ "`"
+	symbolCharacter = ~(
+		"`" | "\\" | "\""
+		| "(" | ")"
+		| "{" | "}"
+		| "->"
+		| ":"
+		| "."
+		| ","
+		| ";"
+		| " "
+		| "\u0000".."\u001f"
+		) any
 }

@@ -1,7 +1,7 @@
 import { Rank, Model, NormalModel, DeferredModel } from './types'
 import { ReduceContext } from './types'
 
-export abstract class ModelBase implements Model {
+export abstract class ModelClass implements Model {
   rank: Rank | null = null
   ctx?: ReduceContext
 
@@ -9,21 +9,7 @@ export abstract class ModelBase implements Model {
     return bottom
   }
 
-  reduce (ctx: ReduceContext): NormalModel {
-    if (this.rank !== null) {
-      return this as NormalModel
-    }
-    else {
-      return bottom
-    }
-  }
-
   parseInThis (goal: Model, src: Model): Model {
-    return bottom
-  }
-
-  // Looks up a name in this model.
-  lookup (name: Symbol) {
     return bottom
   }
 
@@ -32,7 +18,7 @@ export abstract class ModelBase implements Model {
   }
 
   ranked (rank: Rank): NormalModel {
-    this.rank = rank
+    if (this.rank === null) this.rank = rank
     // Typescript doesn't support monotonic typing
     return this as NormalModel
   }
@@ -43,7 +29,7 @@ export abstract class ModelBase implements Model {
   }
 }
 
-export class Constant extends ModelBase {
+export class Constant extends ModelClass {
   kind: 'constant'
 
   constructor (
@@ -53,7 +39,7 @@ export class Constant extends ModelBase {
   }
 }
 
-export class Empty extends ModelBase {
+export class Empty extends ModelClass {
   kind: 'empty'
   rank = Rank.Neutral
 
@@ -62,7 +48,7 @@ export class Empty extends ModelBase {
   }
 }
 
-export class Missing extends ModelBase {
+export class Missing extends ModelClass {
   rank = Rank.Bottom
 
   constructor (
@@ -72,7 +58,7 @@ export class Missing extends ModelBase {
   }
 }
 
-export class Or extends ModelBase {
+export class Or extends ModelClass {
   kind: 'or'
 
   constructor (
@@ -83,7 +69,7 @@ export class Or extends ModelBase {
   }
 }
 
-export class And extends ModelBase {
+export class And extends ModelClass {
   kind: 'and'
 
   constructor (
@@ -94,7 +80,7 @@ export class And extends ModelBase {
   }
 }
 
-export class Sum extends ModelBase {
+export class Sum extends ModelClass {
   kind: 'sum'
 
   constructor (
@@ -105,7 +91,7 @@ export class Sum extends ModelBase {
   }
 }
 
-export class Prod extends ModelBase {
+export class Prod extends ModelClass {
   kind: 'prod'
 
   constructor (
@@ -116,8 +102,89 @@ export class Prod extends ModelBase {
   }
 }
 
-export class Typing extends ModelBase {
+export class UpperJoin extends ModelClass {
+  kind: 'upperJoin'
+
+  constructor (
+    public a: Model,
+    public b: Model,
+  ) {
+    super()
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* UpperJoin.tree(this.a)
+    yield* UpperJoin.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof UpperJoin) yield* model; else yield model
+  }
+}
+
+export class LowerJoin extends ModelClass {
+  kind: 'lowerJoin'
+
+  constructor (
+    public a: Model,
+    public b: Model,
+  ) {
+    super()
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* LowerJoin.tree(this.a)
+    yield* LowerJoin.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof LowerJoin) yield* model; else yield model
+  }
+}
+
+export class UpperMeet extends ModelClass {
+  kind: 'upperMeet'
+
+  constructor (
+    public a: Model,
+    public b: Model,
+  ) {
+    super()
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* UpperMeet.tree(this.a)
+    yield* UpperMeet.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof UpperMeet) yield* model; else yield model
+  }
+}
+
+export class LowerMeet extends ModelClass {
+  kind: 'lowerMeet'
+
+  constructor (
+    public a: Model,
+    public b: Model,
+  ) {
+    super()
+  }
+
+  *[Symbol.iterator] (): IterableIterator<Model> {
+    yield* LowerMeet.tree(this.a)
+    yield* LowerMeet.tree(this.b)
+  }
+
+  static *tree (model): IterableIterator<Model> {
+    if (model instanceof LowerMeet) yield* model; else yield model
+  }
+}
+
+export class Typing extends ModelClass {
   kind: 'binding'
+  rank = Rank.Neutral
 
   constructor (
     public a: Model,
@@ -127,39 +194,30 @@ export class Typing extends ModelBase {
   }
 }
 
-export class Fn extends ModelBase {
+export class FunctionType extends ModelClass {
   kind: 'fn'
+  rank = Rank.Neutral
 
   constructor (
-    public items: Model[],
+    public a: Model,
+    public b: Model,
   ) {
     super()
   }
 }
 
-export class Seq extends ModelBase {
+export class Sequence extends ModelClass {
   kind: 'seq'
 
   constructor (
-    public items: DeferredModel[],
+    public a: Model,
+    public b: Model,
   ) {
     super()
   }
-
-  reduce (ctx: ReduceContext): NormalModel {
-    for (let i = 0; i < this.items.length; ++i) {
-      // normalize the next operand
-      const item = this.items[i]
-      const nf = typeof item === 'function'
-        ? item().reduce(ctx)
-        : item.reduce(ctx)
-      this.items[i] = nf
-    }
-    return this.ranked(Rank.Neutral).inContext(ctx)
-  }
 }
 
-export class Parens extends ModelBase {
+export class Parens extends ModelClass {
   kind: 'parens'
 
   constructor (
@@ -169,8 +227,9 @@ export class Parens extends ModelBase {
   }
 }
 
-export class SymbolType extends ModelBase {
+export class SymbolType extends ModelClass {
   kind: 'symbolType'
+  rank = Rank.Neutral
 
   constructor (
     public chars: string,
@@ -183,7 +242,7 @@ export class SymbolType extends ModelBase {
   }
 }
 
-export class Symbol extends ModelBase {
+export class SymbolInstance extends ModelClass {
   kind: 'name'
 
   constructor (
@@ -209,7 +268,3 @@ export const falsehood = new Constant(Rank.False)
 
 // Denotes undefined result of a model level operation.
 export const undef = new Constant(Rank.Undefined)
-
-export { UpperJoin, LowerJoin } from './join'
-export { UpperMeet, LowerMeet } from './meet'
-export { ArrowCombinator } from './arrow'

@@ -13,11 +13,8 @@ export enum Rank {
 export interface Model {
   rank: Rank | null
   ctx?: ReduceContext
-  reduce (ctx: ReduceContext): NormalModel
   parse (ctx: Model, src: Model): Model
   parseInThis (goal: Model, src: Model): Model
-  // Looks up a name in this model.
-  lookup (name: Model): Model
   // Simple structural equality.
   equals (other: Model): boolean
   ranked (rank: Rank): NormalModel

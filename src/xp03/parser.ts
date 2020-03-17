@@ -1,7 +1,6 @@
 import { join } from 'path'
 import * as model from './model'
 import { OhmParser } from '../util/ohmParser'
-import { ArrowCombinator } from './arrow'
 
 // Structural parser
 export const parser: OhmParser = new OhmParser(join(__dirname, './xp03-recipe.js'), {
@@ -14,24 +13,12 @@ export const parser: OhmParser = new OhmParser(join(__dirname, './xp03-recipe.js
     return new model.Typing(a.model(), b.model())
   },
 
-  Fn_default (items) {
-    const list = items.model()
-    if (list.length === 1) {
-      return list[0]
-    }
-    else {
-      return new ArrowCombinator(list)
-    }
+  Fn_default (a, op, b) {
+    return new model.FunctionType(a.model(), b.model())
   },
 
-  Seq_default (items) {
-    const list = items.model()
-    if (list.length === 1) {
-      return list[0]
-    }
-    else {
-      return new model.Seq(list)
-    }
+  Seq_default (a, op, b) {
+    return new model.Sequence(a.model(), b.model())
   },
 
   Parens (_lb_, term, _rb_) {
@@ -39,7 +26,7 @@ export const parser: OhmParser = new OhmParser(join(__dirname, './xp03-recipe.js
   },
 
   Symbol (ident) {
-    return new model.Symbol(ident.model())
+    return new model.SymbolInstance(ident.model())
   },
 
   SymbolType (symbol) {
@@ -60,7 +47,11 @@ export const parser: OhmParser = new OhmParser(join(__dirname, './xp03-recipe.js
     return this.source.contents
   },
 
-  symbol (_lq_, chars, _rq_) {
+  symbol (chars) {
+    return chars.source.contents
+  },
+
+  symbolType (_lq_, chars, _rq_) {
     return chars.source.contents
   },
 

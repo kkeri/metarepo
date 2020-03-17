@@ -48,7 +48,10 @@ export class BinaryDispatcher<T> {
     l = Object.getPrototypeOf(l)
     while (l) {
       const t = this.map.get(l)
-      if (t) return getRight(r, t)
+      if (t) {
+        const result = getRight(r, t)
+        if (result !== undefined) return result
+      }
       l = Object.getPrototypeOf(l)
     }
     throw new Error('Cannot dispatch object')
@@ -68,6 +71,16 @@ export class BinaryDispatcher<T> {
     return this
   }
 
+  addClassPair (pl: Function, pr: Function, t: T) {
+    let subMap = this.map.get(pl.prototype)
+    if (!subMap) {
+      subMap = new Map()
+      this.map.set(pl.prototype, subMap)
+    }
+    subMap.set(pr.prototype, t)
+    return this
+  }
+
   addPair (pl: object, pr: object, t: T) {
     let subMap = this.map.get(pl)
     if (!subMap) {
@@ -75,15 +88,16 @@ export class BinaryDispatcher<T> {
       this.map.set(pl, subMap)
     }
     subMap.set(pr, t)
+    return this
   }
 }
 
-function getRight<T> (r: object, map: Map<object, T>): T {
+function getRight<T> (r: object, map: Map<object, T>): T | undefined {
   r = Object.getPrototypeOf(r)
   while (r) {
     const t = map.get(r)
     if (t) return t
     r = Object.getPrototypeOf(r)
   }
-  throw new Error('Cannot dispatch object')
+  return undefined
 }

@@ -5,30 +5,23 @@ import { OperatorMap } from '../util/printer'
 export const printActions = new ActionMap().addClasses(model, {
 
   Typing (printer, prec) {
-    printer.operation(operator.eq, prec, this.a, this.b)
+    if (prec < operator.typing.precedence) {
+      printer.operation(operator.typing, prec, this.a, this.b)
+    }
+    else {
+      printer.print(this.a, prec)
+    }
   },
 
-  ArrowCombinator (printer, prec) {
-    printer.infixList(operator.arrow, prec, this.items)
+  FunctionType (printer, prec) {
+    printer.operation(operator.arrow, prec, this.a, this.b)
   },
 
-  Seq (printer) {
-    printer.print(this.items)
+  Sequence (printer, prec) {
+    printer.operation(operator.seq, prec, this.a, this.b)
   },
 
-  // Or (printer, prec) {
-  //   printer.operation(operator.or, prec, this.a, this.b)
-  // },
-
-  // And (printer, prec) {
-  //   printer.operation(operator.and, prec, this.a, this.b)
-  // },
-
-  // Not (printer, prec) {
-  //   printer.operation(operator.not, prec, this.a)
-  // },
-
-  Name (printer) {
+  SymbolInstance (printer) {
     printer.id(this.chars)
   },
 
@@ -48,6 +41,11 @@ export const printActions = new ActionMap().addClasses(model, {
 })
 
 const operator: OperatorMap = {
+  typing: {
+    precedence: 40,
+    fixity: 'in',
+    symbol: ':',
+  },
   eq: {
     precedence: 50,
     fixity: 'in',
@@ -58,21 +56,10 @@ const operator: OperatorMap = {
     fixity: 'in',
     symbol: '->',
   },
-  or: {
-    precedence: 100,
+  seq: {
+    precedence: 400,
     fixity: 'in',
-    symbol: '\\/',
-    parens: true,
-  },
-  and: {
-    precedence: 100,
-    fixity: 'in',
-    symbol: '/\\',
-    parens: true,
-  },
-  not: {
-    precedence: 300,
-    fixity: 'pre',
-    symbol: '~',
+    symbol: ' ',
+    noPadding: true,
   },
 }
