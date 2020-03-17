@@ -12,6 +12,8 @@ export interface Operator {
   // if true, the operation is parenthesized even if its precedence equals
   // that of the parent operation.
   parens?: boolean
+  // if true, the operator is not padded with spaces
+  noPadding?: boolean
 }
 
 export type OperatorMap = { [index: string]: Operator }
@@ -41,7 +43,7 @@ export class ModelPrinter {
   }
 
   // Prints a value with respect to its type and class.
-  print (node: any, prec?: number): this {
+  print (node: any, prec: number = 0): this {
     if (node === undefined) {
       this.keyword('undefined')
     } else if (node === null) {
@@ -109,26 +111,6 @@ export class ModelPrinter {
       case 'post':
         this.print(a, op).operator(op)
         break
-    }
-    if (op.precedence < prec) this.delimiter(')')
-    return this
-  }
-
-  // Prints a binary operation.
-  //    parent - the parent operator or precedence of the parent operator
-  infixList (op, parent: Operator | number | undefined, items: any[]): this {
-    let prec = (typeof parent === 'object') ? parent.precedence : parent || 0
-    if (op.parens && parent !== op) prec++
-    if (op.precedence < prec) this.delimiter('(')
-    let first = true
-    for (const item of items) {
-      if (first) {
-        first = false
-      }
-      else {
-        this.operator(op)
-      }
-      this.print(item, op)
     }
     if (op.precedence < prec) this.delimiter(')')
     return this
